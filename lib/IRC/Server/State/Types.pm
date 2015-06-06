@@ -12,7 +12,7 @@ declare ValidCasemap =>
 
 declare CasemapRef =>
   as ScalarRef,
-  where { ValidCasemap->check($$_) };
+  where { (Enum[qw/rfc1459 strict-rfc1459 ascii/])->check($$_) };
 
 
 1;
