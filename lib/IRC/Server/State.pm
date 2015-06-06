@@ -22,90 +22,14 @@ has casemap => (
   builder => sub { 'rfc1459' },
 );
 
-has channels => (
-  lazy    => 1,
-  is      => 'ro',
-  isa     => TypedHash[ InstanceOf['IRC::Server::State::Channel'] ],
-  coerce  => 1,
-  builder => sub { +{} },
-  handles => +{
-    clear_channels  => 'clear',
-    find_channels   => 'kv_grep', # FIXME method?
-  },
-);
 
-sub add_channel {
-  my ($self, $name, $obj) = @_;
-  $self->channels->set( lc_irc($name, $self->casemap) => $obj );
-}
+with 'IRC::Server::State::Role::UserCollection';
+with 'IRC::Server::State::Role::ChannelCollection';
 
-sub get_channel {
-  my ($self, $name) = @_;
-  $self->channels->get( lc_irc $name, $self->casemap )
-}
+# FIXME override del_user / del_channel to iterate & delete all relevant
+#  ->del_user should remove user from all channels in $user_obj->channels
+#  ->del_channel should remove channel from all users in $chan_obj->users
 
-sub del_channel {
-  my ($self, $name) = @_;
-  # FIXME iterate deleted object's ->users list,
-  #  remove this channel from each user's ->channels list
-  #  return list of 
-  $self->channels->delete( lc_irc $name, $self->casemap )
-}
-
-sub channel_exists {
-  my ($self, $name) = @_;
-  $self->channels->exists( lc_irc $name, $self->casemap )
-}
-
-
-# FIXME Role::UserCollection, Role::ChannelCollection
-#  User & State consume ChannelCollection
-#  Channel & State consume UserCollection
-has users => (
-  lazy    => 1,
-  is      => 'ro',
-  isa     => TypedHash[ InstanceOf['IRC::Server::State::User'] ],
-  coerce  => 1,
-  builder => sub { +{} },
-  # hash_of User, keyed on nick or TS6 ID
-  # 
-  handles => +{
-    clear_users => 'clear',
-    find_users  => 'kv_grep',  # FIXME method?
-  },
-);
-
-sub add_user {
-  my ($self, $name, $obj) = @_;
-  $self->users->set(
-    ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
-      => $obj
-  )
-}
-
-sub get_user {
-  my ($self, $name) = @_;
-  $self->users->get(
-    ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
-  )
-}
-
-sub del_user {
-  my ($self, $name) = @_;
-  # FIXME iterate channels in deleted user obj's ->channels list,
-  #  delete from each channel also
-  #  return list of deleted channels
-  $self->users->delete( 
-    $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  )
-}
-
-sub user_exists {
-  my ($self, $name) = @_;
-  $self->users->exists( 
-    $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  )
-}
 
 has peers => (
   # IRC::Server::Tree ?
