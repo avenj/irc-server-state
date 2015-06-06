@@ -1,5 +1,6 @@
 package IRC::Server::State::Role::ChannelCollection;
 
+use Carp;
 use List::Objects::Types      -types;
 use Types::Standard           -types;
 
@@ -33,10 +34,8 @@ sub get_channel {
 
 sub del_channel {
   my ($self, $name) = @_;
-  # FIXME iterate deleted object's ->users list,
-  #  remove this channel from each user's ->channels list
-  #  return list of
-  $self->channels->delete( lc_irc $name, $self->casemap )
+  my $obj = $self->channels->delete(lc_irc $name, $self->casemap);
+  $obj // confess "No such channel '$name'"
 }
 
 sub channel_exists {

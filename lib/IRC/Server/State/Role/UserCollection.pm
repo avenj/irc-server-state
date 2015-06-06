@@ -41,12 +41,10 @@ sub get_user {
 
 sub del_user {
   my ($self, $name) = @_;
-  # FIXME iterate channels in deleted user obj's ->channels list,
-  #  delete from each channel also
-  #  return list of deleted channels
-  $self->users->delete(
+  my $obj = $self->users->delete(
     $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  )
+  );
+  $obj // confess "No such user or ID '$name'"
 }
 
 sub user_exists {
