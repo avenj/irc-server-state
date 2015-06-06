@@ -1,5 +1,7 @@
 package IRC::Server::State;
 
+use Module::Runtime 'use_module';
+
 use List::Objects::Types -all;
 use Types::Standard -all;
 use IRC::Server::State::Types -all;
@@ -50,7 +52,29 @@ around del_channel => sub {
   \@removed
 };
 
+has user_class => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Str,
+  builder   => sub { 'IRC::Server::State::User' },
+);
 
+sub build_user {
+  my $self = shift;
+  use_module( $self->user_class )->new(@_)
+}
+
+has channel_class => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Str,
+  builder   => sub { 'IRC::Server::State::Channel' },
+);
+
+sub build_channel {
+  my $self = shift;
+  use_module( $self->channel_class )->new(@_)
+}
 
 has peers => (
   # IRC::Server::Tree ?
