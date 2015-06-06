@@ -26,9 +26,30 @@ has casemap => (
 with 'IRC::Server::State::Role::UserCollection';
 with 'IRC::Server::State::Role::ChannelCollection';
 
-# FIXME override del_user / del_channel to iterate & delete all relevant
-#  ->del_user should remove user from all channels in $user_obj->channels
-#  ->del_channel should remove channel from all users in $chan_obj->users
+around del_user => sub {
+  my ($orig, $self, $name) = @_;
+  my $user_obj = $self->$orig($name) // return undef;
+  my @removed;
+  $user_obj->channels->kv_map(sub {
+    my ($chan_name, $chan_obj) = @_;
+    push @removed, $chan_name
+      if $chan_obj->del_user($name);
+  });
+  \@removed
+};
+
+around del_channel => sub {
+  my ($orig, $self, $name) = @_;
+  my $chan_obj = $self->$orig($name);
+  my @removed;
+  $chan_obj->users->kv_map(sub {
+    my ($user_name, $user_obj) = @_;
+    push @removed, $user_name
+      if $user_obj->del_channel($name);
+  });
+  \@removed
+};
+
 
 
 has peers => (
@@ -43,17 +64,10 @@ has peers => (
 
 print <<'_END'
 
-::State
- has casemap
- has channels (hash_of Channel keyed on casefolded channame)
- has users    (hash_of User keyed on casefolded nick or TS6 ID)
- has network  (IRC::Server::Tree::Network?)
+FIXME
 
 ::State::Channel
- has casemap  (ScalarRef to $state->casemap ?)
- has users    (hash_of weak ref to User keyed on casefolded nick or TS6 ID)
  has modes    (hash_of Str keyed on mode)
- has topic    (Dict ?)
  has lists    (hash_of TypedHash[Int] +{ b => +{ $item => 1 } })
 
 ::State::User
