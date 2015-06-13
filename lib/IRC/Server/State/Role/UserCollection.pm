@@ -44,10 +44,9 @@ sub get_user {
 
 sub del_user {
   my ($self, $name) = @_;
-  my $obj = $self->users->delete(
+  $self->users->delete(
     $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  );
-  $obj // confess "No such user or ID '$name'"
+  )->get(0)
 }
 
 sub user_exists {

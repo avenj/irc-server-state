@@ -34,8 +34,7 @@ sub get_channel {
 
 sub del_channel {
   my ($self, $name) = @_;
-  my $obj = $self->channels->delete(lc_irc $name, $self->casemap);
-  $obj // confess "No such channel '$name'"
+  $self->channels->delete(lc_irc $name, $self->casemap)->get(0)
 }
 
 sub channel_exists {
