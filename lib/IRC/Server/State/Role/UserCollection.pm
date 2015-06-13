@@ -22,7 +22,6 @@ has users => (
   # hash_of User, keyed on nick or TS6 ID
   #
   handles => +{
-    clear_users => 'clear',
     find_users  => 'kv_grep',  # FIXME method?
   },
 );

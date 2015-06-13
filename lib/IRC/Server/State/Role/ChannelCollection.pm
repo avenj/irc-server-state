@@ -19,7 +19,6 @@ has channels => (
   coerce  => 1,
   builder => sub { +{} },
   handles => +{
-    clear_channels  => 'clear',
     find_channels   => 'kv_grep', # FIXME method?
   },
 );
