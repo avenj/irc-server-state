@@ -1,5 +1,5 @@
 use Test::More;
-
+use strictures 2;
 use IRC::Server::State;
 
 ## rfc1459, casefold_users => 1
@@ -17,6 +17,7 @@ my $user = $st->build_user(
   hostname => 'example.org',
 );
 isa_ok $user, 'IRC::Server::State::User';
+cmp_ok $user->casemap, 'eq', 'rfc1459', 'casemap passed to User obj ok';
 
 # add_user
 $st->add_user($user->nickname => $user);
@@ -64,8 +65,46 @@ ok !$st->del_user('yourdad'), 'del_user (nonexistant user) ok';
 
 
 # build_channel
+my $chan = $st->build_channel(
+  name => '#f{oo}'
+);
+isa_ok $chan, 'IRC::Server::State::Channel',
+ok $chan->casefold_users, 'casefold_users passed to Channel obj ok';
+cmp_ok $chan->casemap, 'eq', 'rfc1459', 'casemap passed to Channel obj ok';
+
 # add_channel
+$st->add_channel($chan->name => $chan);
+
 # build_and_add_channel
+$st->build_and_add_channel(
+  name => '#Bar[2]'
+);
+
+# get_channel (original case)
+$chan = $st->get_channel('#f{oo}');
+cmp_ok $chan->name, 'eq', '#f{oo}',  'get_channel (original case) ok 1';
+$chan = $st->get_channel('#Bar[2]');
+cmp_ok $chan->name, 'eq', '#Bar[2]', 'get_channel (original case) ok 2';
+
+# get_channel (case-folded)
+$chan = $st->get_channel('#F[oo]');
+cmp_ok $chan->name, 'eq', '#f{oo}',  'get_channel (rfc1459 folded) ok 1';
+$chan = $st->get_channel('#bar{2}');
+cmp_ok $chan->name, 'eq', '#Bar[2]', 'get_channel (rfc1459 folded) ok 2';
+
+# get_channel (nonexistant channel)
+ok !$st->get_channel('#yourdad'), 'get_channel (nonexistant channel) ok';
+
+# channel_exists (original case)
+ok $st->channel_exists('#f{oo}'), 'channel_exists (original case) ok';
+# channel_exists (case-folded)
+ok $st->channel_exists('#F[oo]'), 'channel_exists (rfc1459 folded) ok';
+# channel_exists (nonexistant channel)
+ok !$st->channel_exists('#baz'), 'channel_exists (nonexistant channel) ok';
+
+# del_channel (original case)
+# del_channel (case-folded)
+# del_channel (nonexistant channel)
 
 
 # channel/user interaction;
