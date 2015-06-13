@@ -11,6 +11,7 @@ use IRC::Toolkit::Case;
 use Moo 2;
 
 has casefold_users => (
+  # 'casefold_users => 0' if indexing by TS6 ID or so
   lazy    => 1,
   is      => 'ro',
   isa     => Bool,
@@ -85,6 +86,7 @@ sub build_channel {
   my $self = shift;
   use_module( $self->channel_class )->new(
     casemap => \$self->casemap,
+    casefold_users => $self->casefold_users,
     @_
   )
 }
