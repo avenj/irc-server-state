@@ -42,9 +42,9 @@ has ipaddr => (
   builder   => sub { '255.255.255.255' },
 );
 
-has modes => (
+#has modes => (
   # FIXME
-);
+#);
 
 has meta => (
   lazy      => 1,

@@ -1,7 +1,9 @@
 package IRC::Server::State::Channel;
 
+use Carp;
 use Scalar::Util 'reftype';
 
+use List::Objects::WithUtils;
 use Types::Standard      -all;
 use List::Objects::Types -all;
 use IRC::Server::State::Types -all;
@@ -27,7 +29,12 @@ has name => (
 );
 
 has lists => (
-  # FIXME
+  # $chan->lists->get('b')->exists($mask)
+  lazy      => 1,
+  is        => 'ro',
+  isa       => TypedHash[HashObj],
+  coerce    => 1,
+  builder   => sub { hash_of HashObj },
 );
 
 has modes => (
