@@ -23,7 +23,6 @@ has channels => (
   },
 );
 
-sub channel_names   { shift->channels->keys->all }
 sub channel_objects { shift->channels->values->all }
 
 sub add_channel {

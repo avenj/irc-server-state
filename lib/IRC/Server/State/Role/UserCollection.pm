@@ -26,7 +26,6 @@ has users => (
   },
 );
 
-sub user_names   { shift->users->keys->all }
 sub user_objects { shift->users->values->all }
 
 sub add_user {

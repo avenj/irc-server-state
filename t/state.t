@@ -30,8 +30,6 @@ $st->build_and_add_user(
   hostname => 'example.org',
 );
 
-# user_names
-# FIXME
 # user_objects
 # FIXME
 
@@ -90,8 +88,6 @@ $st->build_and_add_channel(
   name => '#Bar[2]'
 );
 
-# channel_names
-# FIXME
 # channel_objects
 # FIXME
 
