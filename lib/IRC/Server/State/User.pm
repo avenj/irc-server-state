@@ -9,7 +9,7 @@ use Moo;
 has casemap => (
   required  => 1,
   is        => 'ro',
-  isa       => CasemapRef,
+  isa       => ValidCasemap,
 );
 
 

@@ -63,7 +63,7 @@ has user_class => (
 sub build_user {
   my $self = shift;
   use_module( $self->user_class )->new(
-    casemap => \$self->casemap,
+    casemap => $self->casemap,
     @_
   )
 }
@@ -85,7 +85,7 @@ has channel_class => (
 sub build_channel {
   my $self = shift;
   use_module( $self->channel_class )->new(
-    casemap => \$self->casemap,
+    casemap => $self->casemap,
     casefold_users => $self->casefold_users,
     @_
   )

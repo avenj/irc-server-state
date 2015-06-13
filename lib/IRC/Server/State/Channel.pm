@@ -19,7 +19,7 @@ has casefold_users => (
 has casemap => (
   required  => 1,
   is        => 'ro',
-  isa       => CasemapRef,
+  isa       => ValidCasemap,
 );
 
 has name => (
@@ -37,9 +37,9 @@ has lists => (
   builder   => sub { hash_of HashObj },
 );
 
-has modes => (
+#has modes => (
   # FIXME
-);
+#);
 
 
 has topic => (

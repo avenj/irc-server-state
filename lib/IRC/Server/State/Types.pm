@@ -10,9 +10,5 @@ use Types::Standard -types;
 declare ValidCasemap =>
   as Enum[qw/rfc1459 strict-rfc1459 ascii/];
 
-declare CasemapRef =>
-  as ScalarRef,
-  where { (Enum[qw/rfc1459 strict-rfc1459 ascii/])->check($$_) };
-
 
 1;
