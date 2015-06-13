@@ -30,6 +30,11 @@ $st->build_and_add_user(
   hostname => 'example.org',
 );
 
+# user_names
+# FIXME
+# user_objects
+# FIXME
+
 # get_user (original case)
 $user = $st->get_user('Foo[213]');
 cmp_ok $user->nickname, 'eq', 'Foo[213]', 'get_user (original case) ok 1';
@@ -54,6 +59,9 @@ ok $st->user_exists('fOO{213}'), 'user_exists (rfc1459 fold) ok';
 # user_exists (nonexistant user)
 ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
 
+# find_users
+# FIXME
+
 # del_user (original case)
 $st->del_user('Foo[213]');
 ok !$st->user_exists('Foo[213]'), 'del_user (original case) ok';
@@ -63,11 +71,7 @@ ok !$st->user_exists('Ba[\]r'),   'del_user (rfc1459 fold) ok';
 # del_user (nonexistant user)
 ok !$st->del_user('yourdad'),     'del_user (nonexistant user) ok';
 
-# find_users
-# FIXME
-# clear_users
-# FIXME
-
+# users->is_empty
 ok $st->users->is_empty, 'users hash is empty ok';
 
 # build_channel
@@ -85,6 +89,11 @@ $st->add_channel($chan->name => $chan);
 $st->build_and_add_channel(
   name => '#Bar[2]'
 );
+
+# channel_names
+# FIXME
+# channel_objects
+# FIXME
 
 # get_channel (original case)
 $chan = $st->get_channel('#f{oo}');
@@ -108,6 +117,9 @@ ok $st->channel_exists('#F[oo]'), 'channel_exists (rfc1459 folded) ok';
 # channel_exists (nonexistant channel)
 ok !$st->channel_exists('#baz'),  'channel_exists (nonexistant channel) ok';
 
+# find_channels
+# FIXME
+
 # del_channel (original case)
 $st->del_channel('#f{oo}');
 ok !$st->channel_exists('#f{oo}'),  'del_channel (original case) ok';
@@ -117,11 +129,7 @@ ok !$st->channel_exists('#Bar[2]'), 'del_channel (rfc1459 folded) ok';
 # del_channel (nonexistant channel)
 ok !$st->del_channel('#baz'),       'del_channel (nonexistant channel) ok';
 
-# find_channels
-# FIXME
-# clear_channels
-# FIXME
-
+# channels->is_empty
 ok $st->channels->is_empty, 'channels hash empty ok';
 
 # FIXME
