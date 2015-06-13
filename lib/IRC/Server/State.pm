@@ -43,7 +43,7 @@ around del_user => sub {
 
 around del_channel => sub {
   my ($orig, $self, $name) = @_;
-  my $chan_obj = $self->$orig($name);
+  my $chan_obj = $self->$orig($name) // return undef;
   my @removed;
   $chan_obj->users->kv_map(sub {
     my ($user_name, $user_obj) = @_;
