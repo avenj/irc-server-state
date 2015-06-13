@@ -54,17 +54,26 @@ ok $st->user_exists('fOO{213}'), 'user_exists (rfc1459 fold) ok';
 ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
 
 # del_user (original case)
+$st->del_user('Foo[213]');
+ok !$st->user_exists('Foo[213]'), 'del_user (original case) ok';
 # del_user (case-folded)
+$st->del_user('ba{|}r');
+ok !$st->user_exists('Ba[\]r'),   'del_user (rfc1459 fold) ok';
 # del_user (nonexistant user)
+ok !$st->del_user('yourdad'), 'del_user (nonexistant user) ok';
 
 
 # build_channel
 # add_channel
 # build_and_add_channel
 
+
 # channel/user interaction;
+#   add some users & channels, 'join' users to selected channels
 #   $st->del_user should remove user from all applicable channels' ->users
+#    (and return the list of removed channel objects)
 #   $st->del_channel should remove channel from applicable users' ->channels
+#    (and return the list of removed user objects)
 
 
 ## rfc1459, casefold_users => 0
