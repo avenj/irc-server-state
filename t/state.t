@@ -44,11 +44,14 @@ $user = $st->get_user('ba{|}r');
 cmp_ok $user->nickname, 'eq', 'Ba[\]r',   'get_user (rfc1459 fold) ok 3';
 
 # get_user (nonexistant user)
-ok !$st->get_user('foobar'), 'get_user on nonexistant user returns false';
+ok !$st->get_user('foobar'), 'get_user (nonexistant user) ok';
 
 # user_exists (original case)
+ok $st->user_exists('Foo[213]'), 'user_exists (original case) ok';
 # user_exists (case-folded)
+ok $st->user_exists('fOO{213}'), 'user_exists (rfc1459 fold) ok';
 # user_exists (nonexistant user)
+ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
 
 # del_user (original case)
 # del_user (case-folded)
@@ -58,6 +61,10 @@ ok !$st->get_user('foobar'), 'get_user on nonexistant user returns false';
 # build_channel
 # add_channel
 # build_and_add_channel
+
+# channel/user interaction;
+#   $st->del_user should remove user from all applicable channels' ->users
+#   $st->del_channel should remove channel from applicable users' ->channels
 
 
 ## rfc1459, casefold_users => 0
