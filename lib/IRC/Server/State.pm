@@ -34,7 +34,7 @@ around del_user => sub {
   my @removed;
   $user_obj->channels->kv_map(sub {
     my ($chan_name, $chan_obj) = @_;
-    push @removed, $chan_name
+    push @removed, $chan_obj
       if $chan_obj->del_user($name);
   });
   \@removed
@@ -46,7 +46,7 @@ around del_channel => sub {
   my @removed;
   $chan_obj->users->kv_map(sub {
     my ($user_name, $user_obj) = @_;
-    push @removed, $user_name
+    push @removed, $user_obj
       if $user_obj->del_channel($name);
   });
   \@removed
