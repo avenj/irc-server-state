@@ -25,6 +25,15 @@ has $_ => (
   hostname
 /;
 
+has id => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Defined,
+  writer    => 'set_id',
+  predicate => 1,
+  builder   => sub { shift->nickname },
+);
+
 has realhost => (
   lazy      => 1,
   is        => 'ro',
