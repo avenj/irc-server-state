@@ -4,6 +4,8 @@ use Carp;
 use List::Objects::Types      -types;
 use Types::Standard           -types;
 
+use IRC::Toolkit::Case;
+
 use Moo::Role;
 
 requires qw/
