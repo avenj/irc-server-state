@@ -45,7 +45,7 @@ $user = $st->get_user('ba{|}r');
 cmp_ok $user->nickname, 'eq', 'Ba[\]r',   'get_user (rfc1459 fold) ok 3';
 
 # get_user (nonexistant user)
-ok !$st->get_user('foobar'), 'get_user (nonexistant user) ok';
+ok !$st->get_user('foobar'),              'get_user (nonexistant user) ok';
 
 # user_exists (original case)
 ok $st->user_exists('Foo[213]'), 'user_exists (original case) ok';
@@ -61,8 +61,14 @@ ok !$st->user_exists('Foo[213]'), 'del_user (original case) ok';
 $st->del_user('ba{|}r');
 ok !$st->user_exists('Ba[\]r'),   'del_user (rfc1459 fold) ok';
 # del_user (nonexistant user)
-ok !$st->del_user('yourdad'), 'del_user (nonexistant user) ok';
+ok !$st->del_user('yourdad'),     'del_user (nonexistant user) ok';
 
+# find_users
+# FIXME
+# clear_users
+# FIXME
+
+ok $st->users->is_empty, 'users hash is empty ok';
 
 # build_channel
 my $chan = $st->build_channel(
@@ -93,20 +99,32 @@ $chan = $st->get_channel('#bar{2}');
 cmp_ok $chan->name, 'eq', '#Bar[2]', 'get_channel (rfc1459 folded) ok 2';
 
 # get_channel (nonexistant channel)
-ok !$st->get_channel('#yourdad'), 'get_channel (nonexistant channel) ok';
+ok !$st->get_channel('#yourdad'),     'get_channel (nonexistant channel) ok';
 
 # channel_exists (original case)
 ok $st->channel_exists('#f{oo}'), 'channel_exists (original case) ok';
 # channel_exists (case-folded)
 ok $st->channel_exists('#F[oo]'), 'channel_exists (rfc1459 folded) ok';
 # channel_exists (nonexistant channel)
-ok !$st->channel_exists('#baz'), 'channel_exists (nonexistant channel) ok';
+ok !$st->channel_exists('#baz'),  'channel_exists (nonexistant channel) ok';
 
 # del_channel (original case)
+$st->del_channel('#f{oo}');
+ok !$st->channel_exists('#f{oo}'),  'del_channel (original case) ok';
 # del_channel (case-folded)
+$st->del_channel('#bar{2}');
+ok !$st->channel_exists('#Bar[2]'), 'del_channel (rfc1459 folded) ok';
 # del_channel (nonexistant channel)
+ok !$st->del_channel('#baz'),       'del_channel (nonexistant channel) ok';
 
+# find_channels
+# FIXME
+# clear_channels
+# FIXME
 
+ok $st->channels->is_empty, 'channels hash empty ok';
+
+# FIXME
 # channel/user interaction;
 #   add some users & channels, 'join' users to selected channels
 #   $st->del_user should remove user from all applicable channels' ->users
@@ -115,9 +133,11 @@ ok !$st->channel_exists('#baz'), 'channel_exists (nonexistant channel) ok';
 #    (and return the list of removed user objects)
 
 
-## rfc1459, casefold_users => 0
+## rfc1459, casefold_users => 0  (TS6 IDs)
+# FIXME
 
 ## strict-rfc1459, casefold_users => 1
+# FIXME
 
 ## ascii, casefold_users => 1
 
