@@ -1,7 +1,10 @@
 package IRC::Server::State::Role::UserCollection;
 
+use Carp;
 use List::Objects::Types      -types;
 use Types::Standard           -types;
+
+use IRC::Toolkit::Case;
 
 use Moo::Role;
 
