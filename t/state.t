@@ -31,7 +31,9 @@ $st->build_and_add_user(
 );
 
 # user_objects
-# FIXME
+my @user_objs = $st->user_objects;
+ok @user_objs == 2, 'user_objects returned 2 items ok';
+isa_ok $_, 'IRC::Server::State::User' for @user_objs;
 
 # get_user (original case)
 $user = $st->get_user('Foo[213]');
@@ -89,7 +91,11 @@ $st->build_and_add_channel(
 );
 
 # channel_objects
-# FIXME
+my @chan_objs = $st->channel_objects;
+ok @chan_objs == 2, 'channel_objects returned 2 items ok';
+for (@chan_objs) {
+  isa_ok $_, 'IRC::Server::State::Channel'
+}
 
 # get_channel (original case)
 $chan = $st->get_channel('#f{oo}');
