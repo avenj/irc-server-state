@@ -61,8 +61,18 @@ has user_class => (
 
 sub build_user {
   my $self = shift;
-  use_module( $self->user_class )->new(@_)
+  use_module( $self->user_class )->new(
+    casemap => \$self->casemap,
+    @_
+  )
 }
+
+sub build_and_add_user {
+  my $self = shift;
+  my $user = $self->build_user(@_);
+  $self->add_user($user->nickname => $user)
+}
+
 
 has channel_class => (
   lazy      => 1,
@@ -73,17 +83,27 @@ has channel_class => (
 
 sub build_channel {
   my $self = shift;
-  use_module( $self->channel_class )->new(@_)
+  use_module( $self->channel_class )->new(
+    casemap => \$self->casemap,
+    @_
+  )
 }
 
-has peers => (
+sub build_and_add_channel {
+  my $self = shift;
+  my $chan = $self->build_channel(@_);
+  $self->add_channel($chan->name => $chan)
+}
+
+
+#has peers => (
   # IRC::Server::Tree ?
   #  needs reworked anyway ...
   #  possibly something MXR::DependsOn-based
   #  TypedHash[ ConsumerOf['MooX::Role::DependsOn'] ] ?
   #  possibly Peer should be a consumer of DependsOn instead,
   #  +{ $name => $obj }
-);
+#);
 
 
 print <<'_END'
