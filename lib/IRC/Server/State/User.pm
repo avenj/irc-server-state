@@ -32,6 +32,20 @@ has _chans => (
 
 sub channel_list { keys %{ $self->_chans } }
 
+sub _add_channel {
+  my ($self, $channame) = @_;
+  if (my $st = $self->state) {
+    $channame = lc_irc $channame, $st->casemap;
+  }
+  $self->_chans->{$channame} = +{};
+  $channame
+}
+
+sub _del_channel {
+  my ($self, $actual) = @_;
+  delete $self->_chans->{$actual}
+}
+
 has $_ => (
   required  => 1,
   is        => 'ro',
