@@ -1,5 +1,7 @@
 package IRC::Server::State;
 
+use Carp;
+
 use Module::Runtime 'use_module';
 
 use List::Objects::Types -all;
@@ -25,33 +27,9 @@ has casemap => (
   builder => sub { 'rfc1459' },
 );
 
-
 with 'IRC::Server::State::Role::UserCollection';
 with 'IRC::Server::State::Role::ChannelCollection';
 
-around del_user => sub {
-  my ($orig, $self, $name) = @_;
-  my $user_obj = $self->$orig($name) // return undef;
-  my @removed;
-  $user_obj->channels->kv_map(sub {
-    my ($chan_name, $chan_obj) = @_;
-    push @removed, $chan_obj
-      if $chan_obj->del_user($name);
-  });
-  \@removed
-};
-
-around del_channel => sub {
-  my ($orig, $self, $name) = @_;
-  my $chan_obj = $self->$orig($name) // return undef;
-  my @removed;
-  $chan_obj->users->kv_map(sub {
-    my ($user_name, $user_obj) = @_;
-    push @removed, $user_obj
-      if $user_obj->del_channel($name);
-  });
-  \@removed
-};
 
 has user_class => (
   lazy      => 1,
@@ -63,6 +41,7 @@ has user_class => (
 sub build_user {
   my $self = shift;
   use_module( $self->user_class )->new(
+    state   => $self;
     casemap => $self->casemap,
     @_
   )
@@ -73,6 +52,17 @@ sub build_and_add_user {
   my $user = $self->build_user(@_);
   $self->add_user($user->nickname => $user)
 }
+
+around del_user => sub {
+  my ($orig, $self, $name) = @_;
+  my $uobj = $self->$orig($name) // return undef;
+  my $actual_name = $self->casefold_users ?
+    lc_irc($name, $self->casemap) : $name;
+  for my $channame ($uobj->channel_list) {
+    $self->_chans->{$channame}->_del_user($actual_name)
+  }
+  $uobj
+};
 
 
 has channel_class => (
@@ -85,6 +75,7 @@ has channel_class => (
 sub build_channel {
   my $self = shift;
   use_module( $self->channel_class )->new(
+    state   => $self,
     casemap => $self->casemap,
     casefold_users => $self->casefold_users,
     @_
@@ -97,8 +88,18 @@ sub build_and_add_channel {
   $self->add_channel($chan->name => $chan)
 }
 
+around del_channel => sub {
+  my ($orig, $self, $name) = @_;
+  my $chobj = $self->$orig($name) // return undef;
+  my $actual_name = lc_irc $name, $self->casemap;
+  for my $nickname ($chobj->user_list) {
+    $self->_users->{$nickname}->_del_channel($actual_name)
+  }
+  $chobj
+}
 
-#has peers => (
+
+#has _peers => (
   # IRC::Server::Tree ?
   #  needs reworked anyway ...
   #  possibly something MXR::DependsOn-based
