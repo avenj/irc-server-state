@@ -12,7 +12,7 @@ requires qw/
   casemap
 /;
 
-has channels => (
+has _chans => (
   lazy    => 1,
   is      => 'ro',
   isa     => TypedHash[ InstanceOf['IRC::Server::State::Channel'] ],
@@ -23,26 +23,26 @@ has channels => (
   },
 );
 
-sub channel_objects { shift->channels->values->all }
+sub channel_objects { shift->_chans->values->all }
 
 sub add_channel {
   my ($self, $name, $obj) = @_;
-  $self->channels->set( lc_irc($name, $self->casemap) => $obj );
+  $self->_chans->set( lc_irc($name, $self->casemap) => $obj );
 }
 
 sub get_channel {
   my ($self, $name) = @_;
-  $self->channels->get( lc_irc $name, $self->casemap )
+  $self->_chans->get( lc_irc $name, $self->casemap )
 }
 
 sub del_channel {
   my ($self, $name) = @_;
-  $self->channels->delete(lc_irc $name, $self->casemap)->get(0)
+  $self->_chans->delete(lc_irc $name, $self->casemap)->get(0)
 }
 
 sub channel_exists {
   my ($self, $name) = @_;
-  $self->channels->exists( lc_irc $name, $self->casemap )
+  $self->_chans->exists( lc_irc $name, $self->casemap )
 }
 
 

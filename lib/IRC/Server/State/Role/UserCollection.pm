@@ -13,7 +13,7 @@ requires qw/
   casefold_users
 /;
 
-has users => (
+has _users => (
   lazy    => 1,
   is      => 'ro',
   isa     => TypedHash[ InstanceOf['IRC::Server::State::User'] ],
@@ -26,11 +26,11 @@ has users => (
   },
 );
 
-sub user_objects { shift->users->values->all }
+sub user_objects { shift->_users->values->all }
 
 sub add_user {
   my ($self, $name, $obj) = @_;
-  $self->users->set(
+  $self->_users->set(
     ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
       => $obj
   )
@@ -38,14 +38,14 @@ sub add_user {
 
 sub get_user {
   my ($self, $name) = @_;
-  $self->users->get(
+  $self->_users->get(
     ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
   )
 }
 
 sub del_user {
   my ($self, $name) = @_;
-  $self->users->delete(
+  $self->_users->delete(
     $self->casefold_users ? lc_irc($name, $self->casemap) : $name
   )->get(0)
 }
@@ -59,7 +59,7 @@ sub chg_user_nick {
 
 sub user_exists {
   my ($self, $name) = @_;
-  $self->users->exists(
+  $self->_users->exists(
     $self->casefold_users ? lc_irc($name, $self->casemap) : $name
   )
 }
