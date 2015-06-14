@@ -10,22 +10,17 @@ use IRC::Server::State::Types -all;
 
 use Moo 2;
 
-has casefold_users => (
-  required  => 1,
-  is        => 'ro',
-  isa       => Bool,
-);
-
-has casemap => (
-  required  => 1,
-  is        => 'ro',
-  isa       => ValidCasemap,
-);
-
 has name => (
   required  => 1,
   is        => 'ro',
   isa       => Str,
+);
+
+has state => (
+  required  => 1,
+  is        => 'ro',
+  isa       => InstanceOf['IRC::Server::State'],
+  weak_ref  => 1,
 );
 
 has lists => (
@@ -36,6 +31,24 @@ has lists => (
   coerce    => 1,
   builder   => sub { hash_of HashObj },
 );
+
+has _users => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => HashObj,
+  coerce    => 1,
+  builder   => sub { +{} },
+);
+
+sub _nick_chg {
+  my ($self, $old_actual, $new_actual) = @_;
+  my $old_rec = delete $self->_users->{$old_actual};
+  confess "User not in channel state: '$old_actual'"
+    unless $old_rec;
+  $self->_users->{$new_actual} = $old_rec
+}
+
+# FIXME more user manip methods
 
 #has modes => (
   # FIXME
@@ -70,7 +83,5 @@ has ts => (
   builder   => sub { time },
 );
 
-
-with 'IRC::Server::State::Role::UserCollection';
 
 1;

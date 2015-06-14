@@ -4,22 +4,33 @@ use IRC::Server::State::Types -types;
 use Types::Standard      -types;
 use List::Objects::Types -types;
 
+use IRC::Toolkit::Case 'lc_irc';
+
 use Moo;
 
-has casemap => (
+has state => (
   required  => 1,
   is        => 'ro',
-  isa       => ValidCasemap,
+  isa       => InstanceOf['IRC::Server::State'],
+  weak_ref  => 1,
 );
 
 has nickname => (
   required  => 1,
   is        => 'ro',
   isa       => Str,
-  # Bad idea to write these directly,
-  # ->chg_user_nick instead
   writer    => '_set_nickname',
 );
+
+has _chans => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => HashObj,
+  coerce    => 1,
+  builder   => sub { +{} },
+);
+
+sub channel_list { keys %{ $self->_chans } }
 
 has $_ => (
   required  => 1,
@@ -27,10 +38,33 @@ has $_ => (
   isa       => Str,
   writer    => "set_$_",
 ) for qw/
+  nickname
   username
   realname
   hostname
 /;
+
+around _set_nickname => sub {
+  my ($orig, $self, $new) = @_;
+  # adjust parent state, 
+  if (my $st = $self->state) {
+    my ($old_actual, $new_actual);
+    if ($st->casefold_users) {
+      $old_actual = lc_irc $self->nickname, $st->casemap;
+      $new_actual = lc_irc $new, $st->casemap;
+    } else {
+      $old_actual = $self->nickname;
+      $new_actual = $new;
+    }
+    # maybe just a case-change:
+    return if $old_actual eq $new_actual;
+    delete $st->_users->{$old_actual};
+    $st->_users->{$new_actual} = $self;
+    for my $channame ($self->channel_list) {
+      $st->_chans->{$channame}->_nick_chg($old_actual => $new_actual)
+    }
+  }
+};
 
 has id => (
   lazy      => 1,
@@ -70,7 +104,5 @@ has meta => (
   predicate => 1,
   builder   => sub { +{} },
 );
-
-with 'IRC::Server::State::Role::ChannelCollection';
 
 1;
