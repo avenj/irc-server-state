@@ -40,6 +40,20 @@ has _users => (
   builder   => sub { +{} },
 );
 
+sub _add_user {
+  my ($self, $nickname) = @_;
+  if (my $st = $self->state) {
+    $nickname = lc_irc $nickname, $st->casemap;
+  }
+  $self->_users->{$nickname} = +{};
+  $nickname
+}
+
+sub _del_user {
+  my ($self, $actual) = @_;
+  delete $self->_users->{$actual}
+}
+
 sub _nick_chg {
   my ($self, $old_actual, $new_actual) = @_;
   my $old_rec = delete $self->_users->{$old_actual};
