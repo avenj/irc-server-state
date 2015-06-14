@@ -50,6 +50,13 @@ sub del_user {
   )->get(0)
 }
 
+sub chg_user_nick {
+  my ($self, $old, $new) = @_;
+  my $obj = $self->del_user($old)
+    || confess "Cannot chg_user_nick for nonexistant user '$old'";
+  $self->add_user($new => $obj)
+}
+
 sub user_exists {
   my ($self, $name) = @_;
   $self->users->exists(

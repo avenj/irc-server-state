@@ -12,6 +12,14 @@ has casemap => (
   isa       => ValidCasemap,
 );
 
+has nickname => (
+  required  => 1,
+  is        => 'ro',
+  isa       => Str,
+  # Bad idea to write these directly,
+  # ->chg_user_nick instead
+  writer    => '_set_nickname',
+);
 
 has $_ => (
   required  => 1,
@@ -19,7 +27,6 @@ has $_ => (
   isa       => Str,
   writer    => "set_$_",
 ) for qw/
-  nickname
   username
   realname
   hostname

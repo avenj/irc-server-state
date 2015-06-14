@@ -49,8 +49,16 @@ cmp_ok $user->nickname, 'eq', 'Foo[213]', 'get_user (rfc1459 fold) ok 2';
 $user = $st->get_user('ba{|}r');
 cmp_ok $user->nickname, 'eq', 'Ba[\]r',   'get_user (rfc1459 fold) ok 3';
 
+# get_user (nickname changed)
+$user->set_nickname('Bar[\]r');
+$user = $st->get_user('Bar[\]r');
+cmp_ok $user->nickname, 'eq', 'Bar[\]r', 'get_user (orig case after chg) ok';
+$user = $st->get_user('bar{\]R');
+cmp_ok $user->nickname, 'eq', 'Bar[\]r', 'get_user (rfc fold after chg) ok';
+
 # get_user (nonexistant user)
 ok !$st->get_user('foobar'),              'get_user (nonexistant user) ok';
+
 
 # user_exists (original case)
 ok $st->user_exists('Foo[213]'), 'user_exists (original case) ok';
@@ -66,8 +74,8 @@ ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
 $st->del_user('Foo[213]');
 ok !$st->user_exists('Foo[213]'), 'del_user (original case) ok';
 # del_user (case-folded)
-$st->del_user('ba{|}r');
-ok !$st->user_exists('Ba[\]r'),   'del_user (rfc1459 fold) ok';
+$st->del_user('bar{|}r');
+ok !$st->user_exists('Bar[\]r'),  'del_user (rfc1459 fold) ok';
 # del_user (nonexistant user)
 ok !$st->del_user('yourdad'),     'del_user (nonexistant user) ok';
 
