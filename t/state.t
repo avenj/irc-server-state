@@ -17,7 +17,6 @@ my $user = $st->build_user(
   hostname => 'example.org',
 );
 isa_ok $user, 'IRC::Server::State::User';
-cmp_ok $user->casemap, 'eq', 'rfc1459', 'casemap passed to User obj ok';
 
 # add_user
 $st->add_user($user->nickname => $user);
@@ -79,16 +78,11 @@ ok !$st->user_exists('Bar[\]r'),  'del_user (rfc1459 fold) ok';
 # del_user (nonexistant user)
 ok !$st->del_user('yourdad'),     'del_user (nonexistant user) ok';
 
-# users->is_empty
-ok $st->users->is_empty, 'users hash is empty ok';
-
 # build_channel
 my $chan = $st->build_channel(
   name => '#f{oo}'
 );
 isa_ok $chan, 'IRC::Server::State::Channel',
-ok $chan->casefold_users, 'casefold_users passed to Channel obj ok';
-cmp_ok $chan->casemap, 'eq', 'rfc1459', 'casemap passed to Channel obj ok';
 
 # add_channel
 $st->add_channel($chan->name => $chan);
@@ -138,9 +132,6 @@ $st->del_channel('#bar{2}');
 ok !$st->channel_exists('#Bar[2]'), 'del_channel (rfc1459 folded) ok';
 # del_channel (nonexistant channel)
 ok !$st->del_channel('#baz'),       'del_channel (nonexistant channel) ok';
-
-# channels->is_empty
-ok $st->channels->is_empty, 'channels hash empty ok';
 
 # FIXME
 # channel/user interaction;

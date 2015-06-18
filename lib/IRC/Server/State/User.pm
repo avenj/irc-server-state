@@ -15,13 +15,6 @@ has state => (
   weak_ref  => 1,
 );
 
-has nickname => (
-  required  => 1,
-  is        => 'ro',
-  isa       => Str,
-  writer    => '_set_nickname',
-);
-
 has _chans => (
   lazy      => 1,
   is        => 'ro',
@@ -30,7 +23,7 @@ has _chans => (
   builder   => sub { +{} },
 );
 
-sub channel_list { keys %{ $self->_chans } }
+sub channel_list { keys %{ $_[0]->_chans } }
 
 sub _add_channel {
   my ($self, $channame) = @_;
@@ -58,7 +51,7 @@ has $_ => (
   hostname
 /;
 
-around _set_nickname => sub {
+around set_nickname => sub {
   my ($orig, $self, $new) = @_;
   # adjust parent state, 
   if (my $st = $self->state) {
@@ -78,6 +71,7 @@ around _set_nickname => sub {
       $st->_chans->{$channame}->_nick_chg($old_actual => $new_actual)
     }
   }
+  $self->$orig($new)
 };
 
 has id => (

@@ -41,7 +41,7 @@ has user_class => (
 sub build_user {
   my $self = shift;
   use_module( $self->user_class )->new(
-    state   => $self;
+    state   => $self,
     casemap => $self->casemap,
     @_
   )
@@ -96,7 +96,7 @@ around del_channel => sub {
     $self->_users->{$nickname}->_del_channel($actual_name)
   }
   $chobj
-}
+};
 
 
 #has _peers => (
@@ -107,28 +107,6 @@ around del_channel => sub {
   #  possibly Peer should be a consumer of DependsOn instead,
   #  +{ $name => $obj }
 #);
-
-
-print <<'_END'
-
-FIXME
-
-::State::Channel
- has modes    (hash_of Str keyed on mode)
- has lists    (hash_of TypedHash[Int] +{ b => +{ $item => 1 } })
-
-::State::User
- has casemap
- has nickname (Str)
- has username (Str)
- has hostmask (Str)
- has realhost (Str)
- has ipaddr   (Str)
- has modes    (
-
-
-
-_END
-unless caller; 1;
+1;
 
 # vim: ts=2 sw=2 et sts=2 ft=perl

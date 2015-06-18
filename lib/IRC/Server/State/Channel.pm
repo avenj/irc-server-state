@@ -40,6 +40,8 @@ has _users => (
   builder   => sub { +{} },
 );
 
+sub user_list { keys %{ $_[0]->_users } }
+
 sub _add_user {
   my ($self, $nickname) = @_;
   if (my $st = $self->state) {
