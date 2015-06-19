@@ -66,13 +66,15 @@ cmp_ok $user->nickname, 'eq', 'Bar[\]r', 'get_user (rfc fold after chg) ok';
 # get_user (nonexistant user)
 ok !$st->get_user('foobar'),              'get_user (nonexistant user) ok';
 
-
 # user_exists (original case)
 ok $st->user_exists('Foo[213]'), 'user_exists (original case) ok';
 # user_exists (case-folded)
 ok $st->user_exists('fOO{213}'), 'user_exists (rfc1459 fold) ok';
 # user_exists (nonexistant user)
 ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
+
+# user_objects
+# FIXME
 
 # find_users
 # FIXME
@@ -90,15 +92,22 @@ ok !$st->del_user('yourdad'),     'del_user (nonexistant user) ok';
 my $chan = $st->build_channel(
   name => '#f{oo}'
 );
-isa_ok $chan, 'IRC::Server::State::Channel',
+isa_ok $chan, 'IRC::Server::State::Channel';
 
 # add_channel
-$st->add_channel($chan->name => $chan);
+cmp_ok $st->add_channel($chan), '==', $chan,
+  'add_channel returned Channel obj ok';
+
+# attempting to re-add channel croaks
+eval {; $st->add_channel($chan) };
+like $@, qr/exists/, 'attempting to add existing channel croaks ok';
 
 # build_and_add_channel
-$st->build_and_add_channel(
+$chan = $st->build_and_add_channel(
   name => '#Bar[2]'
 );
+cmp_ok $chan->name, 'eq', '#Bar[2]', 
+  'build_and_add_channel returned Channel obj ok';
 
 # channel_objects
 my @chan_objs = $st->channel_objects;
@@ -106,6 +115,8 @@ ok @chan_objs == 2, 'channel_objects returned 2 items ok';
 for (@chan_objs) {
   isa_ok $_, 'IRC::Server::State::Channel'
 }
+
+undef $chan;
 
 # get_channel (original case)
 $chan = $st->get_channel('#f{oo}');
@@ -120,7 +131,7 @@ $chan = $st->get_channel('#bar{2}');
 cmp_ok $chan->name, 'eq', '#Bar[2]', 'get_channel (rfc1459 folded) ok 2';
 
 # get_channel (nonexistant channel)
-ok !$st->get_channel('#yourdad'),     'get_channel (nonexistant channel) ok';
+ok !$st->get_channel('#yourdad'),    'get_channel (nonexistant channel) ok';
 
 # channel_exists (original case)
 ok $st->channel_exists('#f{oo}'), 'channel_exists (original case) ok';
@@ -128,6 +139,9 @@ ok $st->channel_exists('#f{oo}'), 'channel_exists (original case) ok';
 ok $st->channel_exists('#F[oo]'), 'channel_exists (rfc1459 folded) ok';
 # channel_exists (nonexistant channel)
 ok !$st->channel_exists('#baz'),  'channel_exists (nonexistant channel) ok';
+
+# channel_objects
+# FIXME
 
 # find_channels
 # FIXME
