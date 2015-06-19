@@ -49,8 +49,7 @@ sub build_user {
 
 sub build_and_add_user {
   my $self = shift;
-  my $user = $self->build_user(@_);
-  $self->add_user($user->nickname => $user)
+  $self->add_user( $self->build_user(@_) )
 }
 
 around del_user => sub {
@@ -84,8 +83,7 @@ sub build_channel {
 
 sub build_and_add_channel {
   my $self = shift;
-  my $chan = $self->build_channel(@_);
-  $self->add_channel($chan->name => $chan)
+  $self->add_channel( $self->build_channel(@_) )
 }
 
 around del_channel => sub {
