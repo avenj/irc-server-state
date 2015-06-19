@@ -40,12 +40,19 @@ has _users => (
   builder   => sub { +{} },
 );
 
-sub user_list { keys %{ $_[0]->_users } }
+sub user_list { 
+  my ($self) = @_;
+  if (my $st = $self->state) {
+    # FIXME retrieve $user_obj to get properly-cased ->nickname
+  }
+  keys %{ $_[0]->_users } 
+}
 
 sub _add_user {
   my ($self, $nickname) = @_;
   if (my $st = $self->state) {
     $nickname = lc_irc $nickname, $st->casemap;
+    # FIXME add to user's channel list from here
   }
   $self->_users->{$nickname} = +{};
   $nickname

@@ -23,7 +23,14 @@ has _chans => (
   builder   => sub { +{} },
 );
 
-sub channel_list { keys %{ $_[0]->_chans } }
+sub channel_list { 
+  my ($self) = @_;
+  if (my $st = $self->state) {
+    # FIXME retrieve $chan_obj to get $chan_obj->name
+  }
+
+  keys %{ $_[0]->_chans } 
+}
 
 sub _add_channel {
   my ($self, $channame) = @_;
@@ -98,6 +105,15 @@ has ipaddr => (
   isa       => Str,
   predicate => 1,
   builder   => sub { '255.255.255.255' },
+);
+
+has peer => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => Str,
+  writer    => 'set_peer',
+  predicate => 1,
+  builder   => sub { '' },
 );
 
 #has modes => (
