@@ -155,14 +155,66 @@ ok !$st->channel_exists('#Bar[2]'), 'del_channel (rfc1459 folded) ok';
 # del_channel (nonexistant channel)
 ok !$st->del_channel('#baz'),       'del_channel (nonexistant channel) ok';
 
-# FIXME
-# channel/user interaction;
-#   add some users & channels, 'join' users to selected channels
-#   $st->del_user should remove user from all applicable channels' ->users
-#    (and return the list of removed channel objects)
-#   $st->del_channel should remove channel from applicable users' ->channels
-#    (and return the list of removed user objects)
 
+ok !$st->channel_objects,  'channel_objects empty after deletions';
+ok !$st->user_objects,     'user_objects empty after deletions';
+
+
+## channel/user interaction
+# $chan_baz->add_user($user_bar)
+#  -> adds to user's channel_list
+# $chan_baz->add_user($user_foo)
+# $chan_baz->del_user($user_foo)
+#  -> deletes from user's channel_list
+# $chan_baz->has_user($user_foo)
+# user deletion from state (removed from all channels)
+# channel deletion from state (removed from all users)
+
+my %Users;
+# build_and_add_user Ba[]r
+# build_and_add_user Foo
+$User{Bar} = $st->build_and_add_user(
+  nickname => 'Ba[]r',
+  username => 'barbaz',
+  realname => 'Elvis Presly',
+  hostname => 'example.org',
+);
+$User{Foo} = $st->build_and_add_user(
+  nickname => 'Foo',
+  username => 'foo',
+  realname => 'Washington Irving',
+  hostname => 'cpan.org'
+);
+
+my %Chans;
+# build_and_add_channel #B{az}
+# build_and_add_channel #quux
+$Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
+$Chan{Quux} = $st->build_and_add_channel(name => '#quux');
+
+# add_users ('Ba[]r' and 'Foo' to '#B{az}')
+$Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
+# add_user ('Ba[]r' to '#quux')
+$Chan{Quux}->add_user( $User{Bar} );
+
+# user_list
+is_deeply 
+  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
+  +{ 'Ba[]r' => 1, 'Foo' => 1 },
+  'Channel->user_list ok';
+
+# channel_list
+is_deeply
+  +{ map {; $_ => 1 } $User{Bar}->channel_list },
+  +{ '#B{az}' => 1, '#quux' => 1 },
+  'User->channel_list ok';
+
+# FIXME user_list(s) after nickname change
+
+# del_users
+# del_user
+
+# FIXME $user_obj->add_channel(s) ?
 
 ## rfc1459, casefold_users => 0  (TS6 IDs)
 # FIXME
