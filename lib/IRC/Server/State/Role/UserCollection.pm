@@ -26,14 +26,15 @@ has _users => (
   },
 );
 
-sub user_objects { shift->_users->values->all }
+sub user_objects { values %{ $_[0]->_users } }
 
 sub add_user {
-  my ($self, $name, $obj) = @_;
+  my ($self, $obj) = @_;
   $self->_users->set(
-    ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
+    ($self->casefold_users ? lc_irc($obj->name, $self->casemap) : $name)
       => $obj
-  )
+  );
+  $obj
 }
 
 sub get_user {
@@ -45,6 +46,7 @@ sub get_user {
 
 sub del_user {
   my ($self, $name) = @_;
+  # FIXME accept name_or_obj
   $self->_users->delete(
     $self->casefold_users ? lc_irc($name, $self->casemap) : $name
   )->get(0)

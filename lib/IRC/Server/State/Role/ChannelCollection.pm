@@ -23,11 +23,12 @@ has _chans => (
   },
 );
 
-sub channel_objects { shift->_chans->values->all }
+sub channel_objects { values %{ $_[0]->_chans } }
 
 sub add_channel {
-  my ($self, $name, $obj) = @_;
-  $self->_chans->set( lc_irc($name, $self->casemap) => $obj );
+  my ($self, $obj) = @_;
+  $self->_chans->set( lc_irc($obj->name, $self->casemap) => $obj );
+  $obj
 }
 
 sub get_channel {
@@ -37,6 +38,7 @@ sub get_channel {
 
 sub del_channel {
   my ($self, $name) = @_;
+  # FIXME accept name_or_obj
   $self->_chans->delete(lc_irc $name, $self->casemap)->get(0)
 }
 
