@@ -19,20 +19,28 @@ my $user = $st->build_user(
 isa_ok $user, 'IRC::Server::State::User';
 
 # add_user
-$st->add_user($user->nickname => $user);
+cmp_ok $st->add_user($user), '==', $user, 'add_user returned User obj ok';
+
+# attempting to re-add user croaks
+eval {; $st->add_user($user) };
+like $@, qr/exist/, 'add_user for existing user croaks ok';
 
 # build_and_add_user  ('Ba[\]r')
-$st->build_and_add_user(
+$user = $st->build_and_add_user(
   nickname => 'Ba[\]r',
   username => 'barbaz',
   realname => 'Elvis Presly',
   hostname => 'example.org',
 );
+cmp_ok $user->nickname, 'eq', 'Ba[\]r',
+  'build_and_add_user returned User obj ok';
 
 # user_objects
 my @user_objs = $st->user_objects;
 ok @user_objs == 2, 'user_objects returned 2 items ok';
 isa_ok $_, 'IRC::Server::State::User' for @user_objs;
+
+undef $user;
 
 # get_user (original case)
 $user = $st->get_user('Foo[213]');
