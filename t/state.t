@@ -100,7 +100,7 @@ cmp_ok $st->add_channel($chan), '==', $chan,
 
 # attempting to re-add channel croaks
 eval {; $st->add_channel($chan) };
-like $@, qr/exists/, 'attempting to add existing channel croaks ok';
+like $@, qr/exist/, 'attempting to add existing channel croaks ok';
 
 # build_and_add_channel
 $chan = $st->build_and_add_channel(
@@ -170,7 +170,7 @@ ok !$st->user_objects,     'user_objects empty after deletions';
 # user deletion from state (removed from all channels)
 # channel deletion from state (removed from all users)
 
-my %Users;
+my %User;
 # build_and_add_user Ba[]r
 # build_and_add_user Foo
 $User{Bar} = $st->build_and_add_user(
@@ -186,7 +186,7 @@ $User{Foo} = $st->build_and_add_user(
   hostname => 'cpan.org'
 );
 
-my %Chans;
+my %Chan;
 # build_and_add_channel #B{az}
 # build_and_add_channel #quux
 $Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
@@ -209,10 +209,15 @@ is_deeply
   +{ '#B{az}' => 1, '#quux' => 1 },
   'User->channel_list ok';
 
-# FIXME user_list(s) after nickname change
+# FIXME user_list after nickname change
 
 # del_users
 # del_user
+# user_list after user deletion
+
+# del_channels
+# del_channel
+# channel_list after channel deletion
 
 # FIXME $user_obj->add_channel(s) ?
 

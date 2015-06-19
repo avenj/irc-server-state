@@ -30,10 +30,11 @@ sub user_objects { values %{ $_[0]->_users } }
 
 sub add_user {
   my ($self, $obj) = @_;
-  $self->_users->set(
-    ($self->casefold_users ? lc_irc($obj->name, $self->casemap) : $name)
-      => $obj
-  );
+  my $lower = $self->casefold_users ?
+    lc_irc($obj->nickname, $self->casemap) : $obj->nickname;
+  croak "Attempted to re-add existing user: ".$obj->nickname
+    if $self->_users->exists($lower);
+  $self->_users->set( $lower => $obj );
   $obj
 }
 

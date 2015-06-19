@@ -27,7 +27,10 @@ sub channel_objects { values %{ $_[0]->_chans } }
 
 sub add_channel {
   my ($self, $obj) = @_;
-  $self->_chans->set( lc_irc($obj->name, $self->casemap) => $obj );
+  my $lower = lc_irc $obj->name, $self->casemap;
+  croak "Attempted to re-add existing channel: ".$obj->name
+    if $self->_chans->exists($lower);
+  $self->_chans->set( $lower => $obj );
   $obj
 }
 
@@ -39,7 +42,7 @@ sub get_channel {
 sub del_channel {
   my ($self, $name) = @_;
   # FIXME accept name_or_obj
-  $self->_chans->delete(lc_irc $name, $self->casemap)->get(0)
+  $self->_chans->delete( lc_irc $name, $self->casemap )->get(0)
 }
 
 sub channel_exists {
