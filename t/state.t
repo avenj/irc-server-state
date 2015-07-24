@@ -2,6 +2,23 @@ use Test::More;
 use strictures 2;
 use IRC::Server::State;
 
+sub channel_has_users {
+  my ($chan, $nicklist, $desc) = @_;
+  is_deeply
+    +{ map {; $_ => 1 } $chan->user_list },
+    +{ map {; $_ => 1 } @$nicklist },
+    ($desc // $chan->name . ' has users ' . join ', ', @$nicklist)
+}
+
+sub user_has_channels {
+  my ($user, $chanlist, $desc) = @_;
+  is_deeply
+    +{ map {; $_ => 1 } $user->channel_list },
+    +{ map {; $_ => 1 } @$chanlist },
+    ($desc // $user->nickname . ' has channels ' . join ', ', @$chanlist)
+}
+
+
 my $st = IRC::Server::State->new;
 
 # casemap
@@ -15,7 +32,7 @@ my $user = $st->build_user(
   hostname => 'example.org',
 );
 isa_ok $user, 'IRC::Server::State::User';
-ok $user->casemap, 'eq', $st->casemap, 'User casemap matches State ok';
+cmp_ok $user->casemap, 'eq', $st->casemap, 'User casemap matches State ok';
 
 # add_user
 cmp_ok $st->add_user($user), '==', $user, 'add_user returned User obj ok';
@@ -210,9 +227,7 @@ is_deeply
 #  -> #quux  => [ 'Ba[]r' ]
 #  -> #B{az} => [ 'Ba[]r', 'fOO' ]
 $User{Foo}->set_nickname('fOO');
-is_deeply 
-  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
-  +{ 'Ba[]r' => 1, 'fOO' => 1 },
+channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
   'Channel->user_list after set_nickname ok';
 
 # Channel->del_users  (by name, folded)
@@ -230,10 +245,14 @@ ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
 $Chan{Baz}->del_users( $User{Foo} );
-is_deeply
-  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
-  +{ 'Ba[]r' => 1 },
+channel_has_users $Chan{Baz}, [ 'Ba[]r' ], 
   'Channel->user_list after del_users by obj ok';
+channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
+  'Channel->user_list consistency check';
+user_has_channels $User{Bar}, [ '#quux', '#B{az}' ],
+  'User->channel_list (1) after del_users by obj ok';
+user_has_channels $User{Foo}, [ ],
+  'User->channel_list (2) after del_users by obj ok';
 
 # Channel->del_user   (by name, folded)
 #   -> #quux  => [ 'Ba[]r' ]
