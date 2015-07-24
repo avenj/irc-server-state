@@ -235,8 +235,31 @@ is_deeply
   +{ 'Ba[]r' => 1 },
   'Channel->user_list after del_users by obj ok';
 
-# Channel->del_user   (by name)
+# Channel->del_user   (by name, folded)
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+$Chan{Baz}->add_user( $User{Foo} );
+$Chan{Baz}->del_user( 'Foo' );
+is_deeply
+  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
+  +{ 'Ba[]r' => 1 },
+  'Channel->user_list after del_user by name ok';
+
 # Channel->del_user   (by obj)
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+$Chan{Baz}->add_user( $User{Foo} );
+$Chan{Baz}->del_user( $User{Foo} );
+is_deeply
+  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
+  +{ 'Ba[]r' => 1 },
+  'Channel->user_list after del_user by obj ok';
 
 # User->add_channels
 # User->add_channel
