@@ -2,12 +2,10 @@ use Test::More;
 use strictures 2;
 use IRC::Server::State;
 
-## rfc1459, casefold_users => 1
 my $st = IRC::Server::State->new;
 
-# casemap & casefold_users
+# casemap
 cmp_ok $st->casemap, 'eq', 'rfc1459', 'default casemap ok';
-ok $st->casefold_users,               'default casefold_users ok';
 
 # build_user  ('Foo[213]')
 my $user = $st->build_user(
@@ -17,6 +15,7 @@ my $user = $st->build_user(
   hostname => 'example.org',
 );
 isa_ok $user, 'IRC::Server::State::User';
+ok $user->casemap, 'eq', $st->casemap, 'User casemap matches State ok';
 
 # add_user
 cmp_ok $st->add_user($user), '==', $user, 'add_user returned User obj ok';
@@ -108,6 +107,8 @@ $chan = $st->build_and_add_channel(
 );
 cmp_ok $chan->name, 'eq', '#Bar[2]', 
   'build_and_add_channel returned Channel obj ok';
+cmp_ok $chan->casemap, 'eq', $st->casemap,
+  'Channel casemap matches State casemap ok';
 
 # channel_objects
 my @chan_objs = $st->channel_objects;
@@ -161,14 +162,6 @@ ok !$st->user_objects,     'user_objects empty after deletions';
 
 
 ## channel/user interaction
-# $chan_baz->add_user($user_bar)
-#  -> adds to user's channel_list
-# $chan_baz->add_user($user_foo)
-# $chan_baz->del_user($user_foo)
-#  -> deletes from user's channel_list
-# $chan_baz->has_user($user_foo)
-# user deletion from state (removed from all channels)
-# channel deletion from state (removed from all users)
 
 my %User;
 # build_and_add_user Ba[]r
@@ -192,42 +185,56 @@ my %Chan;
 $Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
 $Chan{Quux} = $st->build_and_add_channel(name => '#quux');
 
-# add_users ('Ba[]r' and 'Foo' to '#B{az}')
+# Channel->add_users ('Ba[]r' and 'Foo' to '#B{az}')
 $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
-# add_user ('Ba[]r' to '#quux')
+# Channel->add_user ('Ba[]r' to '#quux')
 $Chan{Quux}->add_user( $User{Bar} );
 
-# user_list
+# Channel->user_list
 is_deeply 
   +{ map {; $_ => 1 } $Chan{Baz}->user_list },
   +{ 'Ba[]r' => 1, 'Foo' => 1 },
   'Channel->user_list ok';
 
-# channel_list
+# User->channel_list
 is_deeply
   +{ map {; $_ => 1 } $User{Bar}->channel_list },
   +{ '#B{az}' => 1, '#quux' => 1 },
   'User->channel_list ok';
 
-# FIXME user_list after nickname change
+# user_list after set_nickname (Foo -> fOO)
+$User{Foo}->set_nickname('fOO');
+is_deeply 
+  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
+  +{ 'Ba[]r' => 1, 'fOO' => 1 },
+  'Channel->user_list after set_nickname ok';
 
-# del_users
-# del_user
-# user_list after user deletion
+# Channel->del_users
+# Channel->del_user
+# Channel->user_list after user deletion
 
-# del_channels
-# del_channel
-# channel_list after channel deletion
+# FIXME deleting user from state deletes from channels
 
-# FIXME $user_obj->add_channel(s) ?
+# FIXME should adding a previously nonexistant channel to a User belonging to
+#  a State add to State, warn, die?
 
-## rfc1459, casefold_users => 0  (TS6 IDs)
+# User->add_channels
+# User->add_channel
+# channel_list after channel addition
+
+# User->del_channels
+# User->del_channel
+# User->channel_list after channel deletion
+
+# FIXME deleting channel from state deletes from users
+
+# FIXME memory cycle check on complete tree
+
+## strict-rfc1459
 # FIXME
 
-## strict-rfc1459, casefold_users => 1
+## ascii
 # FIXME
-
-## ascii, casefold_users => 1
 
 
 ## exceptions
