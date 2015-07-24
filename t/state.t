@@ -2,21 +2,12 @@ use Test::More;
 use strictures 2;
 use IRC::Server::State;
 
-sub channel_has_users {
-  my ($chan, $nicklist, $desc) = @_;
-  is_deeply
-    +{ map {; $_ => 1 } $chan->user_list },
-    +{ map {; $_ => 1 } @$nicklist },
-    ($desc // $chan->name . ' has users ' . join ', ', @$nicklist)
-}
+use lib 't/inc';
 
-sub user_has_channels {
-  my ($user, $chanlist, $desc) = @_;
-  is_deeply
-    +{ map {; $_ => 1 } $user->channel_list },
-    +{ map {; $_ => 1 } @$chanlist },
-    ($desc // $user->nickname . ' has channels ' . join ', ', @$chanlist)
-}
+use ISSHelpers qw/
+  user_has_channels
+  channel_has_users
+/;
 
 
 my $st = IRC::Server::State->new;
@@ -245,13 +236,16 @@ ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
 $Chan{Baz}->del_users( $User{Foo} );
-channel_has_users $Chan{Baz}, [ 'Ba[]r' ], 
+channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
   'Channel->user_list after del_users by obj ok';
+
 channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
   'Channel->user_list consistency check';
+
 user_has_channels $User{Bar}, [ '#quux', '#B{az}' ],
   'User->channel_list (1) after del_users by obj ok';
-user_has_channels $User{Foo}, [ ],
+
+user_has_channels $User{Foo}, [],
   'User->channel_list (2) after del_users by obj ok';
 
 # Channel->del_user   (by name, folded)
