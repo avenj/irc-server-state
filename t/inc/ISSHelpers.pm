@@ -21,7 +21,7 @@ our @EXPORT = our @EXPORT_OK = qw/
 my $Test = Test::Builder->new;
 
 
-sub channel_has_users {
+sub channel_has_users ($$;$) {
   my ($chan, $nicklist, $desc) = @_;
 
   die "Expected IRC::Server::State::Channel but got '$chan'"
@@ -48,7 +48,7 @@ sub channel_has_users {
   ()
 }
 
-sub user_has_channels {
+sub user_has_channels ($$;$) {
   my ($user, $chanlist, $desc) = @_;
 
   die "Expected IRC::Server::State::User but got '$user'"
