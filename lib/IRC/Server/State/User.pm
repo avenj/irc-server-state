@@ -6,7 +6,10 @@ use List::Objects::Types -types;
 
 use IRC::Toolkit::Case 'lc_irc';
 
+
 use Moo;
+with 'IRC::Server::State::Role::HasCasemap';
+
 
 has state => (
   required  => 1,

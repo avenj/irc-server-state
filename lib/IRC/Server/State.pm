@@ -12,24 +12,11 @@ use IRC::Toolkit::Case;
 
 use Moo 2;
 
-has casefold_users => (
-  # 'casefold_users => 0' if indexing by TS6 ID or so
-  lazy    => 1,
-  is      => 'ro',
-  isa     => Bool,
-  builder => sub { 1 },
-);
-
-has casemap => (
-  lazy    => 1,
-  is      => 'ro',
-  isa     => ValidCasemap,
-  builder => sub { 'rfc1459' },
-);
-
-with 'IRC::Server::State::Role::UserCollection';
-with 'IRC::Server::State::Role::ChannelCollection';
-
+with 
+     'IRC::Server::State::Role::HasCasemap',
+     'IRC::Server::State::Role::UserCollection',
+     'IRC::Server::State::Role::ChannelCollection',
+;
 
 has user_class => (
   lazy      => 1,
@@ -55,10 +42,9 @@ sub build_and_add_user {
 around del_user => sub {
   my ($orig, $self, $name) = @_;
   my $uobj = $self->$orig($name) // return undef;
-  my $actual_name = $self->casefold_users ?
-    lc_irc($name, $self->casemap) : $name;
+  my $actual_name = lc_irc($name, $self->casemap);
   for my $channame ($uobj->channel_list) {
-    $self->_chans->{$channame}->_del_user($actual_name)
+    $self->_chans->{$channame}->_del_user($actual_name) # FIXME
   }
   $uobj
 };
@@ -76,7 +62,6 @@ sub build_channel {
   use_module( $self->channel_class )->new(
     state   => $self,
     casemap => $self->casemap,
-    casefold_users => $self->casefold_users,
     @_
   )
 }

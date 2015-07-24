@@ -8,10 +8,7 @@ use IRC::Toolkit::Case;
 
 use Moo::Role;
 
-requires qw/
-  casemap
-  casefold_users
-/;
+requires 'casemap';
 
 has _users => (
   lazy    => 1,
@@ -28,6 +25,7 @@ has _users => (
 
 sub user_objects { values %{ $_[0]->_users } }
 
+# FIXME no more casefold_users
 sub add_user {
   my ($self, $obj) = @_;
   my $lower = $self->casefold_users ?

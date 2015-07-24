@@ -1,14 +1,22 @@
 package IRC::Server::State::Channel;
 
+use strictures 2;
+
 use Carp;
 use Scalar::Util 'reftype';
 
 use List::Objects::WithUtils;
-use Types::Standard      -all;
-use List::Objects::Types -all;
+
+use Types::Standard           -all;
+use List::Objects::Types      -all;
 use IRC::Server::State::Types -all;
 
-use Moo 2;
+use IRC::Toolkit::Case 'lc_irc';
+
+
+use Moo;
+with 'IRC::Server::State::Role::HasCasemap';
+
 
 has name => (
   required  => 1,
