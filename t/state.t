@@ -185,9 +185,13 @@ my %Chan;
 $Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
 $Chan{Quux} = $st->build_and_add_channel(name => '#quux');
 
-# Channel->add_users ('Ba[]r' and 'Foo' to '#B{az}')
+# Channel->add_users
+#  -> #quux  => []
+#  -> #B{az} => [ 'Ba[]r', 'Foo' ]
 $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
 # Channel->add_user ('Ba[]r' to '#quux')
+#  -> #quux  => [ 'Ba[]r' ]
+#  -> #B{az} => [ 'Ba[]r', 'Foo' ]
 $Chan{Quux}->add_user( $User{Bar} );
 
 # Channel->user_list
@@ -203,30 +207,57 @@ is_deeply
   'User->channel_list ok';
 
 # user_list after set_nickname (Foo -> fOO)
+#  -> #quux  => [ 'Ba[]r' ]
+#  -> #B{az} => [ 'Ba[]r', 'fOO' ]
 $User{Foo}->set_nickname('fOO');
 is_deeply 
   +{ map {; $_ => 1 } $Chan{Baz}->user_list },
   +{ 'Ba[]r' => 1, 'fOO' => 1 },
   'Channel->user_list after set_nickname ok';
 
-# Channel->del_users
-# Channel->del_user
-# Channel->user_list after user deletion
+# Channel->del_users  (by name, folded)
+# ('Ba[]r', 'fOO' from #B{az})
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => []
+$Chan{Baz}->del_users('ba{}r', 'Foo');
+ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
 
-# FIXME deleting user from state deletes from channels
+# Channel->del_users  (by obj)
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+$Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
+$Chan{Baz}->del_users( $User{Foo} );
+is_deeply
+  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
+  +{ 'Ba[]r' => 1 },
+  'Channel->user_list after del_users by obj ok';
 
-# FIXME should adding a previously nonexistant channel to a User belonging to
-#  a State add to State, warn, die?
+# Channel->del_user   (by name)
+# Channel->del_user   (by obj)
 
 # User->add_channels
 # User->add_channel
 # channel_list after channel addition
 
-# User->del_channels
-# User->del_channel
+# User->del_channels  (by name)
+# User->del_channels  (by obj)
+# User->del_channel   (by name)
+# User->del_channels  (by obj)
 # User->channel_list after channel deletion
 
 # FIXME deleting channel from state deletes from users
+# State->del_channels  (by name)
+# State->del_channels  (by obj)
+# State->del_channel   (by name)
+# State->del_channels  (by obj)
+
+# FIXME deleting user from state deletes from channels
+
+# FIXME should adding a previously nonexistant channel to a User belonging to
+#  a State add to State, warn, die?
 
 # FIXME memory cycle check on complete tree
 
