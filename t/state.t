@@ -315,6 +315,11 @@ user_has_channels $User{Foo}, ['#quux', '#B{az}'];
 #  a State add to State, warn, die?
 
 # FIXME memory cycle check on complete tree
+#   object lifetimes
+#     User holds weak refs to Channel,
+#     Channel holds weak refs to User,
+#     a UserCollection / ChannelCollection consumer holds the
+#     only strong refs, document as such?
 
 ## strict-rfc1459
 # FIXME
