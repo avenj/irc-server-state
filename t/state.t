@@ -255,11 +255,12 @@ user_has_channels $User{Foo}, [],
 #   -> #quux  => [ 'Ba[]r' ]
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_user( $User{Foo} );
+user_has_channels $User{Foo}, [ '#B{az}' ];
 $Chan{Baz}->del_user( 'Foo' );
-is_deeply
-  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
-  +{ 'Ba[]r' => 1 },
+channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
   'Channel->user_list after del_user by name ok';
+user_has_channels $User{Foo}, [],
+  'User->channel_list after del_user by name ok';
 
 # Channel->del_user   (by obj)
 #   -> #quux  => [ 'Ba[]r' ]
@@ -269,20 +270,38 @@ is_deeply
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_user( $User{Foo} );
 $Chan{Baz}->del_user( $User{Foo} );
-is_deeply
-  +{ map {; $_ => 1 } $Chan{Baz}->user_list },
-  +{ 'Ba[]r' => 1 },
+channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
   'Channel->user_list after del_user by obj ok';
+user_has_channels $User{Foo}, [];
 
 # User->add_channels
+#   -> #quux  => [ 'Ba[]r', 'fOO' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+$User{Foo}->add_channels( $Chan{Quux}, $Chan{Baz} );
+channel_has_users $Chan{Quux}, [qw/Ba[]r fOO/],
+  'Channel->user_list after User->add_channels ok';
+channel_has_users $Chan{Baz}, [qw/Ba[]r fOO/];
+user_has_channels $User{Bar}, ['#quux', '#B{az}'];
+user_has_channels $User{Foo}, ['#quux', '#B{az}'];
+
 # User->add_channel
-# channel_list after channel addition
+#   -> #quux  => [ 'Ba[]r', 'fOO' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r', 'fOO' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+$Chan{Baz}->del_user( $User{Foo} );
+$User{Foo}->add_channel( $Chan{Baz} );
+channel_has_users $Chan{Quux}, [qw/Ba[]r fOO/],
+  'Channel->user_list after User->add_channel ok';
+channel_has_users $Chan{Baz}, [qw/Ba[]r fOO/];
+user_has_channels $User{Bar}, ['#quux', '#B{az}'];
+user_has_channels $User{Foo}, ['#quux', '#B{az}'];
 
 # User->del_channels  (by name)
 # User->del_channels  (by obj)
 # User->del_channel   (by name)
 # User->del_channels  (by obj)
-# User->channel_list after channel deletion
 
 # FIXME deleting channel from state deletes from users
 # State->del_channels  (by name)
