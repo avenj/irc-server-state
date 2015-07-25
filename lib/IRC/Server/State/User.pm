@@ -29,14 +29,7 @@ has _chans => (
   builder   => sub { +{} },
 );
 
-sub channel_list { 
-  my ($self) = @_;
-  if (my $st = $self->state) {
-    # FIXME retrieve $chan_obj to get $chan_obj->name
-  }
-
-  keys %{ $_[0]->_chans } 
-}
+sub channel_list { map {; $_->name } values %{ $_[0]->_chans } }
 
 sub _add_channel {
   my ($self, $obj) = @_;
@@ -78,22 +71,14 @@ has $_ => (
 
 around set_nickname => sub {
   my ($orig, $self, $new) = @_;
-  # adjust parent state, 
-  if (my $st = $self->state) {
-    my ($old_actual, $new_actual);
-    if ($st->casefold_users) {
-      $old_actual = lc_irc $self->nickname, $st->casemap;
-      $new_actual = lc_irc $new, $st->casemap;
-    } else {
-      $old_actual = $self->nickname;
-      $new_actual = $new;
-    }
-    # maybe just a case-change:
-    return if $old_actual eq $new_actual;
-    delete $st->_users->{$old_actual};
-    $st->_users->{$new_actual} = $self;
-    for my $channame ($self->channel_list) {
-      $st->_chans->{$channame}->_nick_chg($old_actual => $new_actual)
+  # maybe just a case-change:
+  my $old_lower = lc_irc $self->nickname, $self->casemap;
+  my $new_lower = lc_irc $new, $self->casemap;
+  unless ($old_lower eq $new_lower) {
+    $self->state->_chg_user_nick($old_lower => $new_lower)
+      if defined $self->state;
+    for my $chan ($self->channel_objects) {
+      $chan->_nick_chg($old_lower => $new_lower)
     }
   }
   $self->$orig($new)
