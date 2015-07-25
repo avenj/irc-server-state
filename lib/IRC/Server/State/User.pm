@@ -1,5 +1,8 @@
 package IRC::Server::State::User;
 
+use strictures 2;
+use Scalar::Util 'blessed', 'weaken';
+
 use IRC::Server::State::Types -types;
 use Types::Standard      -types;
 use List::Objects::Types -types;
@@ -10,13 +13,6 @@ use IRC::Toolkit::Case 'lc_irc';
 use Moo;
 with 'IRC::Server::State::Role::HasCasemap';
 
-
-has state => (
-  required  => 1,
-  is        => 'ro',
-  isa       => InstanceOf['IRC::Server::State'],
-  weak_ref  => 1,
-);
 
 has _chans => (
   lazy      => 1,
@@ -36,17 +32,29 @@ sub channel_list {
 }
 
 sub _add_channel {
-  my ($self, $channame) = @_;
-  if (my $st = $self->state) {
-    $channame = lc_irc $channame, $st->casemap;
-  }
-  $self->_chans->{$channame} = +{};
-  $channame
+  my ($self, $obj) = @_;
+  my $lower = lc_irc $obj, $self->casemap;
+  $self->_chans->{$lower} = $obj;
+  weaken $self->_chans->{$lower};
+  $lower
 }
 
-sub _del_channel {
-  my ($self, $actual) = @_;
-  delete $self->_chans->{$actual}
+sub add_channel {
+  my ($self, $obj) = @_;
+  $self->_add_channel($obj);
+  $obj->_add_user($self);
+  $obj
+}
+
+sub add_channels {
+  my $self = shift;
+  $self->add_channel($_) for @_;
+}
+
+sub del_channel {
+  my ($self, $name) = @_;
+  $name = $name->name if blessed $name;
+  # FIXME call _del_channel & delete $self from channel obj if defined
 }
 
 has $_ => (

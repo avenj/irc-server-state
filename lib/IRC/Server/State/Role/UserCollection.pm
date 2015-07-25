@@ -17,7 +17,7 @@ has _users => (
   coerce  => 1,
   builder => sub { +{} },
   # hash_of User, keyed on nick or TS6 ID
-  #
+  # (strong refs)
   handles => +{
     find_users  => 'kv_grep',  # FIXME method?
   },
@@ -25,30 +25,34 @@ has _users => (
 
 sub user_objects { values %{ $_[0]->_users } }
 
-# FIXME no more casefold_users
 sub add_user {
   my ($self, $obj) = @_;
-  my $lower = $self->casefold_users ?
-    lc_irc($obj->nickname, $self->casemap) : $obj->nickname;
-  croak "Attempted to re-add existing user: ".$obj->nickname
+  my $lower = lc_irc $obj->nickname, $self->casemap;
+  confess "Attempted to re-add existing user: ".$obj->nickname
     if $self->_users->exists($lower);
   $self->_users->set( $lower => $obj );
   $obj
 }
 
+sub add_users {
+  ...
+  # FIXME
+}
+
 sub get_user {
   my ($self, $name) = @_;
-  $self->_users->get(
-    ($self->casefold_users ? lc_irc($name, $self->casemap) : $name)
-  )
+  $self->_users->get( lc_irc $name, $self->casemap )
 }
 
 sub del_user {
   my ($self, $name) = @_;
-  # FIXME accept name_or_obj
-  $self->_users->delete(
-    $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  )->get(0)
+  $name = $name->nickname if blessed $name;
+  $self->_users->delete( lc_irc $name, $self->casemap )->get(0)
+}
+
+sub del_users {
+  ...
+  # FIXME
 }
 
 sub chg_user_nick {
@@ -60,9 +64,8 @@ sub chg_user_nick {
 
 sub user_exists {
   my ($self, $name) = @_;
-  $self->_users->exists(
-    $self->casefold_users ? lc_irc($name, $self->casemap) : $name
-  )
+  $name = $name->nickname if blessed $name;
+  $self->_users->exists( lc_irc $name, $self->casemap )
 }
 
 1;

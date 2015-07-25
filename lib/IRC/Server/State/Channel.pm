@@ -3,7 +3,7 @@ package IRC::Server::State::Channel;
 use strictures 2;
 
 use Carp;
-use Scalar::Util 'reftype';
+use Scalar::Util 'reftype', 'weaken';
 
 use List::Objects::WithUtils;
 
@@ -24,13 +24,6 @@ has name => (
   isa       => Str,
 );
 
-has state => (
-  required  => 1,
-  is        => 'ro',
-  isa       => InstanceOf['IRC::Server::State'],
-  weak_ref  => 1,
-);
-
 has lists => (
   # $chan->lists->get('b')->exists($mask)
   lazy      => 1,
@@ -48,27 +41,36 @@ has _users => (
   builder   => sub { +{} },
 );
 
-sub user_list { 
-  my ($self) = @_;
-  if (my $st = $self->state) {
-    # FIXME retrieve $user_obj to get properly-cased ->nickname
-  }
-  keys %{ $_[0]->_users } 
-}
+sub user_list { map {; $_->nickname } values %{ $_[0]->_users } }
 
 sub _add_user {
-  my ($self, $nickname) = @_;
-  if (my $st = $self->state) {
-    $nickname = lc_irc $nickname, $st->casemap;
-    # FIXME add to user's channel list from here
-  }
-  $self->_users->{$nickname} = +{};
-  $nickname
+  my ($self, $obj) = @_;
+  my $lower = lc_irc $obj->nickname, $self->casemap;
+  $self->_users->{$lower} = $obj;
+  weaken $self->_users->{$lower};
+  $lower
+}
+
+sub add_user {
+  my ($self, $obj) = @_;
+  $self->_add_user($obj);
+  $obj->_add_channel($self);
+  $obj
+}
+
+sub add_users {
+  my $self = shift;
+  $self->add_user($_) for @_;
+  1
 }
 
 sub _del_user {
   my ($self, $actual) = @_;
   delete $self->_users->{$actual}
+}
+
+sub del_user {
+
 }
 
 sub _nick_chg {

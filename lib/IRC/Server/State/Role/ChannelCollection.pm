@@ -1,16 +1,17 @@
 package IRC::Server::State::Role::ChannelCollection;
 
+use strictures 2;
 use Carp;
+use Scalar::Util 'blessed';
+
 use List::Objects::Types      -types;
 use Types::Standard           -types;
 
 use IRC::Toolkit::Case;
 
-use Moo::Role;
 
-requires qw/
-  casemap
-/;
+use Moo::Role;
+requires 'casemap';
 
 has _chans => (
   lazy    => 1,
@@ -41,12 +42,13 @@ sub get_channel {
 
 sub del_channel {
   my ($self, $name) = @_;
-  # FIXME accept name_or_obj
+  $name = $name->name if blessed $name;
   $self->_chans->delete( lc_irc $name, $self->casemap )->get(0)
 }
 
 sub channel_exists {
   my ($self, $name) = @_;
+  $name = $name->nickname if blessed $name;
   $self->_chans->exists( lc_irc $name, $self->casemap )
 }
 
