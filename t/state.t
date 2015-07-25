@@ -1,9 +1,10 @@
 use Test::More;
+use Test::Memory::Cycle;
 use strictures 2;
+
 use IRC::Server::State;
 
 use lib 't/inc';
-
 use ISSHelpers qw/
   user_has_channels
   channel_has_users
@@ -193,6 +194,8 @@ my %Chan;
 $Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
 $Chan{Quux} = $st->build_and_add_channel(name => '#quux');
 
+weakened_memory_cycle_ok $st, 'no (weak) cycles in unlinked State';
+
 # Channel->add_users
 #  -> #quux  => []
 #  -> #B{az} => [ 'Ba[]r', 'Foo' ]
@@ -201,6 +204,9 @@ $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
 #  -> #quux  => [ 'Ba[]r' ]
 #  -> #B{az} => [ 'Ba[]r', 'Foo' ]
 $Chan{Quux}->add_user( $User{Bar} );
+
+weakened_memory_cycle_exists $st, 'weak cycle exists in linked State';
+memory_cycle_ok $st, 'no strong cycles in linked State';
 
 # Channel->user_list
 is_deeply 
