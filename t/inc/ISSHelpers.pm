@@ -1,6 +1,7 @@
 package
   ISSHelpers;
 
+use Carp 'confess';
 use strictures 2;
 use Scalar::Util 'blessed', 'reftype';
 
@@ -24,9 +25,9 @@ my $Test = Test::Builder->new;
 sub channel_has_users ($$;$) {
   my ($chan, $nicklist, $desc) = @_;
 
-  die "Expected IRC::Server::State::Channel but got '$chan'"
+  confess "Expected IRC::Server::State::Channel but got '$chan'"
     unless blessed $chan and $chan->isa('IRC::Server::State::Channel');
-  die "Expected ARRAY of nicknames but got '$nicklist'"
+  confess "Expected ARRAY of nicknames but got '$nicklist'"
     unless reftype $nicklist eq 'ARRAY';
   $desc = $chan->name . ' has users ' . join ', ', @$nicklist
     unless defined $desc;
@@ -51,9 +52,9 @@ sub channel_has_users ($$;$) {
 sub user_has_channels ($$;$) {
   my ($user, $chanlist, $desc) = @_;
 
-  die "Expected IRC::Server::State::User but got '$user'"
+  confess "Expected IRC::Server::State::User but got '$user'"
     unless blessed $user and $user->isa('IRC::Server::State::User');
-  die "Expected ARRAY of channel names but got '$chanlist'"
+  confess "Expected ARRAY of channel names but got '$chanlist'"
     unless reftype $chanlist eq 'ARRAY';
   $desc = $user->nickname . ' has channels ' . join ', ', @$chanlist
     unless defined $desc;

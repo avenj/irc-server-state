@@ -24,6 +24,11 @@ use ISSHelpers qw/
 my $user = IRC::Server::State::User->new;
 my $chan = IRC::Server::State::Channel->new;
 
+# default desc
+channel_has_users $chan, [qw/bar baz foo/];
+user_has_channels $user, ['#meh', '#quux'];
+
+# specified desc
 channel_has_users $chan, [qw/bar baz foo/],
   'channel_has_users ok';
 user_has_channels $user, ['#meh', '#quux'],
