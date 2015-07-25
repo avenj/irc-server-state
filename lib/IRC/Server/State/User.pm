@@ -1,11 +1,12 @@
 package IRC::Server::State::User;
 
 use strictures 2;
+use Carp;
 use Scalar::Util 'blessed', 'weaken';
 
 use IRC::Server::State::Types -types;
-use Types::Standard      -types;
-use List::Objects::Types -types;
+use Types::Standard           -types;
+use List::Objects::Types      -types;
 
 use IRC::Toolkit::Case 'lc_irc';
 
@@ -13,6 +14,12 @@ use IRC::Toolkit::Case 'lc_irc';
 use Moo;
 with 'IRC::Server::State::Role::HasCasemap';
 
+has state => (
+  required  => 1,
+  is        => 'ro',
+  isa       => InstanceOf['IRC::Server::State'],
+  weak_ref  => 1,
+);
 
 has _chans => (
   lazy      => 1,
