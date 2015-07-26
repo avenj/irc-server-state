@@ -1,9 +1,8 @@
 package IRC::Server::State::Channel;
 
 use strictures 2;
-
 use Carp;
-use Scalar::Util 'reftype', 'weaken';
+use Scalar::Util 'blessed', 'weaken';
 
 use List::Objects::WithUtils;
 

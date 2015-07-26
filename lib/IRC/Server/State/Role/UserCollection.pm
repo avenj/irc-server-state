@@ -1,14 +1,19 @@
 package IRC::Server::State::Role::UserCollection;
 
+use strictures 2;
+
+use Scalar::Util 'blessed';
 use Carp;
+
 use List::Objects::Types      -types;
 use Types::Standard           -types;
 
 use IRC::Toolkit::Case;
 
-use Moo::Role;
 
+use Moo::Role;
 requires 'casemap';
+
 
 has _users => (
   lazy    => 1,
@@ -63,7 +68,7 @@ sub _chg_user_nick {
     carp "BUG; cannot _chg_user_nick for nonexistant user '$old'";
     return
   }
-  $self->add_user($new => $obj)
+  $self->add_user($obj)
 }
 
 sub user_exists {
