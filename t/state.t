@@ -220,12 +220,16 @@ is_deeply
   +{ '#B{az}' => 1, '#quux' => 1 },
   'User->channel_list ok';
 
-# user_list after set_nickname (Foo -> fOO)
+# user_list after set_nickname (Foo -> foobar -> fOO)
+# (also covers channel list interaction wrt nick changes)
 #  -> #quux  => [ 'Ba[]r' ]
 #  -> #B{az} => [ 'Ba[]r', 'fOO' ]
+$User{Foo}->set_nickname('foobar');
+channel_has_users $Chan{Baz}, [ qw/Ba[]r foobar/ ],
+  'Channel->user_list after set_nickname ok (1)';
 $User{Foo}->set_nickname('fOO');
 channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
-  'Channel->user_list after set_nickname ok';
+  'Channel->user_list after set_nickname ok (2)';
 
 # Channel->del_users  (by name, folded)
 # ('Ba[]r', 'fOO' from #B{az})
@@ -319,13 +323,6 @@ user_has_channels $User{Foo}, ['#quux', '#B{az}'];
 
 # FIXME should adding a previously nonexistant channel to a User belonging to
 #  a State add to State, warn, die?
-
-# FIXME memory cycle check on complete tree
-#   object lifetimes
-#     User holds weak refs to Channel,
-#     Channel holds weak refs to User,
-#     a UserCollection / ChannelCollection consumer holds the
-#     only strong refs, document as such?
 
 ## strict-rfc1459
 # FIXME
