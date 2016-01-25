@@ -43,7 +43,7 @@ $user = $st->build_and_add_user(
 cmp_ok $user->nickname, 'eq', 'Ba[\]r',
   'build_and_add_user returned User obj ok';
 
-# user_objects
+# State->user_objects
 my @user_objs = $st->user_objects;
 ok @user_objs == 2, 'user_objects returned 2 items ok';
 isa_ok $_, 'IRC::Server::State::User' for @user_objs;
@@ -83,9 +83,6 @@ ok $st->user_exists('fOO{213}'), 'user_exists (rfc1459 fold) ok';
 # user_exists (nonexistant user)
 ok !$st->user_exists('yourdad'), 'user_exists (nonexistant user) ok';
 
-# user_objects
-# FIXME
-
 # find_users
 # FIXME
 
@@ -121,7 +118,7 @@ cmp_ok $chan->name, 'eq', '#Bar[2]',
 cmp_ok $chan->casemap, 'eq', $st->casemap,
   'Channel casemap matches State casemap ok';
 
-# channel_objects
+# State->channel_objects
 my @chan_objs = $st->channel_objects;
 ok @chan_objs == 2, 'channel_objects returned 2 items ok';
 for (@chan_objs) {
@@ -151,9 +148,6 @@ ok $st->channel_exists('#f{oo}'), 'channel_exists (original case) ok';
 ok $st->channel_exists('#F[oo]'), 'channel_exists (rfc1459 folded) ok';
 # channel_exists (nonexistant channel)
 ok !$st->channel_exists('#baz'),  'channel_exists (nonexistant channel) ok';
-
-# channel_objects
-# FIXME
 
 # find_channels
 # FIXME
@@ -225,6 +219,18 @@ is_deeply
   +{ map {; $_ => 1 } $User{Bar}->channel_list },
   +{ '#B{az}' => 1, '#quux' => 1 },
   'User->channel_list ok';
+
+# User->channel_objects
+is_deeply
+  +{ map {; $_->name => 1 } $User{Bar}->channel_objects },
+  +{ '#B{az}' => 1, '#quux' => 1 },
+  'User->channel_objects ok';
+
+# Channel->user_objects
+is_deeply
+  +{ map {; $_->nickname => 1 } $Chan{Baz}->user_objects },
+  +{ 'Ba[]r' => 1, 'Foo' => 1 },
+  'Channel->user_objects ok';
 
 # user_list after set_nickname (Foo -> foobar -> fOO)
 # (also covers channel list interaction wrt nick changes)
