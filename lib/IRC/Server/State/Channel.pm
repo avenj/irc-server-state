@@ -40,6 +40,8 @@ has _users => (
   builder   => sub { +{} },
 );
 
+# FIXME fair bit of code dupe with UserCollection
+
 sub user_list { map {; $_->nickname } values %{ $_[0]->_users } }
 
 sub user_objects { values %{ $_[0]->_users } }
@@ -65,19 +67,28 @@ sub add_users {
   1
 }
 
-sub _del_user {
-  my ($self, $actual) = @_;
-  delete $self->_users->{$actual}
+sub del_user {
+  my ($self, $name) = @_;
+  $name = $name->nickname if blessed $name;
+  $self->_users->delete( lc_irc $name, $self->casemap )->get(0)
 }
 
-sub del_user {
-
+sub del_users {
+  my $self = shift;
+  my @removed;
+  for my $user (@_) {
+    if (my $obj = $self->del_user($user)) {
+      push @removed, $obj
+    }
+  }
+  \@removed
 }
 
 sub _nick_chg {
   my ($self, $old_actual, $new_actual) = @_;
+  warn "DEBUG  KNOWN USERS  " . $self->_users->keys->join(',');
   my $old_rec = delete $self->_users->{$old_actual};
-  confess "User not in channel state: '$old_actual'"
+  confess "User not in channel (@{[$self->name]}) state: '$old_actual'"
     unless $old_rec;
   $self->_users->{$new_actual} = $old_rec
 }
