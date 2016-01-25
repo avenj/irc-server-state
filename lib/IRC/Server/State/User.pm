@@ -33,6 +33,12 @@ sub channel_list { map {; $_->name } values %{ $_[0]->_chans } }
 
 sub channel_objects { values %{ $_[0]->_chans } }
 
+sub user_on_channel {
+  my ($self, $name) = @_;
+  $name = $name->name if blessed $name;
+  $self->_chans->exists( lc_irc $name, $self->casemap )
+}
+
 sub _add_channel {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj, $self->casemap;

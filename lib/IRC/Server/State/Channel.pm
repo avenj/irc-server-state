@@ -46,6 +46,12 @@ sub user_list { map {; $_->nickname } values %{ $_[0]->_users } }
 
 sub user_objects { values %{ $_[0]->_users } }
 
+sub channel_has_user {
+  my ($self, $name) = @_;
+  $name = $name->nickname if blessed $name;
+  $self->_users->exists( lc_irc $name, $self->casemap )
+}
+
 sub _add_user {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj->nickname, $self->casemap;
