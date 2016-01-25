@@ -42,6 +42,8 @@ has _users => (
 
 sub user_list { map {; $_->nickname } values %{ $_[0]->_users } }
 
+sub user_objects { values %{ $_[0]->_users } }
+
 sub _add_user {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj->nickname, $self->casemap;
