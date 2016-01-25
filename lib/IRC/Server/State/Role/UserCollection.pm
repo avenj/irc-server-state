@@ -33,7 +33,7 @@ sub user_objects { values %{ $_[0]->_users } }
 sub add_user {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj->nickname, $self->casemap;
-  confess "Attempted to re-add existing user: ".$obj->nickname
+  carp "Re-adding existing user: ".$obj->nickname
     if $self->_users->exists($lower);
   $self->_users->set( $lower => $obj );
   $obj
@@ -56,15 +56,21 @@ sub del_user {
 }
 
 sub del_users {
-  ...
-  # FIXME
+  my $self = shift;
+  my @removed;
+  for my $user (@_) {
+   if (my $obj = $self->del_user($user)) {
+     push @removed, $obj
+   }
+  }
+  \@removed
 }
 
 sub _chg_user_nick {
-  my ($self, $old) = @_;
+  my ($self, $old_lower) = @_;
   my $obj;
-  unless ($obj = $self->del_user($old)) {
-    confess "BUG; cannot _chg_user_nick for nonexistant user '$old'";
+  unless ($obj = $self->_users->delete($old_lower)->get(0)) {
+    confess "BUG; cannot _chg_user_nick for nonexistant user '$old_lower'";
   }
   $self->add_user($obj)
 }
