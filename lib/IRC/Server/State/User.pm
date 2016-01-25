@@ -84,7 +84,7 @@ sub set_nickname {
   my $new_lower = lc_irc $new, $self->casemap;
   $self->_set_nickname($new);
   unless ($old_lower eq $new_lower) {
-    $self->state->_chg_user_nick($old_lower => $new_lower)
+    $self->state->_chg_user_nick($old_lower)
       if defined $self->state;
     for my $chan ($self->channel_objects) {
       $chan->_nick_chg($old_lower => $new_lower)

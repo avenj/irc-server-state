@@ -52,7 +52,6 @@ sub get_user {
 sub del_user {
   my ($self, $name) = @_;
   $name = $name->nickname if blessed $name;
-  # FIXME call channel deletion routines?
   $self->_users->delete( lc_irc $name, $self->casemap )->get(0)
 }
 
@@ -62,11 +61,10 @@ sub del_users {
 }
 
 sub _chg_user_nick {
-  my ($self, $old, $new) = @_;
+  my ($self, $old) = @_;
   my $obj;
   unless ($obj = $self->del_user($old)) {
-    carp "BUG; cannot _chg_user_nick for nonexistant user '$old'";
-    return
+    confess "BUG; cannot _chg_user_nick for nonexistant user '$old'";
   }
   $self->add_user($obj)
 }
