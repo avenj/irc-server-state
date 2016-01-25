@@ -66,7 +66,9 @@ cmp_ok $user->nickname, 'eq', 'Ba[\]r',   'get_user (rfc1459 fold) ok 3';
 
 # get_user (nickname changed)
 $user->set_nickname('Bar[\]r');
-$user = $st->get_user('Bar[\]r');
+$user = $st->get_user('Bar[\]r')
+  or diag explain $st 
+  and fail "failed to get_user from State after set_nickname";
 cmp_ok $user->nickname, 'eq', 'Bar[\]r', 'get_user (orig case after chg) ok';
 $user = $st->get_user('bar{\]R');
 cmp_ok $user->nickname, 'eq', 'Bar[\]r', 'get_user (rfc fold after chg) ok';

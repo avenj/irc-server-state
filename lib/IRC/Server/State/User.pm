@@ -31,6 +31,8 @@ has _chans => (
 
 sub channel_list { map {; $_->name } values %{ $_[0]->_chans } }
 
+sub channel_objects { values %{ $_[0]->_chans } }
+
 sub _add_channel {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj, $self->casemap;
@@ -63,17 +65,24 @@ has $_ => (
   isa       => Str,
   writer    => "set_$_",
 ) for qw/
-  nickname
   username
   realname
   hostname
 /;
 
-around set_nickname => sub {
-  my ($orig, $self, $new) = @_;
+has nickname => (
+  required  => 1,
+  is        => 'ro',
+  isa       => Str,
+  writer    => '_set_nickname',
+);
+
+sub set_nickname {
+  my ($self, $new) = @_;
   # maybe just a case-change:
   my $old_lower = lc_irc $self->nickname, $self->casemap;
   my $new_lower = lc_irc $new, $self->casemap;
+  $self->_set_nickname($new);
   unless ($old_lower eq $new_lower) {
     $self->state->_chg_user_nick($old_lower => $new_lower)
       if defined $self->state;
@@ -81,8 +90,8 @@ around set_nickname => sub {
       $chan->_nick_chg($old_lower => $new_lower)
     }
   }
-  $self->$orig($new)
-};
+  $new
+}
 
 has id => (
   lazy      => 1,
