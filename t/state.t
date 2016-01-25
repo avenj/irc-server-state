@@ -190,13 +190,17 @@ $User{Foo} = $st->build_and_add_user(
   hostname => 'cpan.org'
 );
 
+# these should have a weak cycle ( User -> State -> User )
+weakened_memory_cycle_exists $User{Bar}, 'weak cycle exists for User (1)';
+weakened_memory_cycle_exists $User{Foo}, 'weak cycle exists for User (2)';
+memory_cycle_ok $st, 'no strong cycles in (unlinked) State';
+
 my %Chan;
 # build_and_add_channel #B{az}
 # build_and_add_channel #quux
 $Chan{Baz}  = $st->build_and_add_channel(name => '#B{az}');
 $Chan{Quux} = $st->build_and_add_channel(name => '#quux');
-
-weakened_memory_cycle_ok $st, 'no (weak) cycles in unlinked State';
+weakened_memory_cycle_exists $st, 'weak cycle exists in (unlinked) State';
 
 # Channel->add_users
 #  -> #quux  => []
