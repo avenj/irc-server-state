@@ -257,6 +257,8 @@ ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
 #   -> #quux  => [ 'Ba[]r' ]
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_users( $User{Bar}, $User{Foo} );
+channel_has_users $Chan{Baz}, [ 'Ba[]r', 'fOO' ],
+  'Channel->user_list after readding users ok';
 $Chan{Baz}->del_users( $User{Foo} );
 channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
   'Channel->user_list after del_users by obj ok';

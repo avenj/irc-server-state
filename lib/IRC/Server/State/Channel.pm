@@ -46,7 +46,7 @@ sub user_list { map {; $_->nickname } values %{ $_[0]->_users } }
 
 sub user_objects { values %{ $_[0]->_users } }
 
-sub channel_has_user {
+sub has_user {
   my ($self, $name) = @_;
   $name = $name->nickname if blessed $name;
   $self->_users->exists( lc_irc $name, $self->casemap )
@@ -76,7 +76,13 @@ sub add_users {
 sub del_user {
   my ($self, $name) = @_;
   $name = $name->nickname if blessed $name;
-  $self->_users->delete( lc_irc $name, $self->casemap )->get(0)
+  my $obj = $self->_users->delete( lc_irc $name, $self->casemap )->get(0);
+  if (defined $obj) {
+    $obj->del_channel($self) if $obj->on_channel($self)
+  } else {
+    carp "Attempted to del_user for nonexistant user '$name'"
+  }
+  $obj
 }
 
 sub del_users {

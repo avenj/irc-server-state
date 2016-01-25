@@ -33,7 +33,7 @@ sub channel_list { map {; $_->name } values %{ $_[0]->_chans } }
 
 sub channel_objects { values %{ $_[0]->_chans } }
 
-sub user_on_channel {
+sub on_channel {
   my ($self, $name) = @_;
   $name = $name->name if blessed $name;
   $self->_chans->exists( lc_irc $name, $self->casemap )
@@ -62,7 +62,13 @@ sub add_channels {
 sub del_channel {
   my ($self, $name) = @_;
   $name = $name->name if blessed $name;
-  # FIXME call _del_channel & delete $self from channel obj if defined
+  my $obj = $self->_chans->delete( lc_irc $name, $self->casemap )->get(0);
+  if (defined $obj) {
+    $obj->del_user($self) if $obj->has_user($self);
+  } else {
+    carp "Attempted to del_channel for nonexistant channel '$name'"
+  }
+  $obj
 }
 
 has $_ => (
