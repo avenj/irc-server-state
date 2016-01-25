@@ -43,9 +43,7 @@ around del_user => sub {
   my ($orig, $self, $name) = @_;
   my $uobj = $self->$orig($name) // return undef;
   my $actual_name = lc_irc($name, $self->casemap);
-  for my $channame ($uobj->channel_list) {
-    $self->_chans->{$channame}->_del_user($actual_name) # FIXME
-  }
+  $_->_del_user($actual_name) for $uobj->channel_objects;
   $uobj
 };
 
@@ -75,9 +73,7 @@ around del_channel => sub {
   my ($orig, $self, $name) = @_;
   my $chobj = $self->$orig($name) // return undef;
   my $actual_name = lc_irc $name, $self->casemap;
-  for my $nickname ($chobj->user_list) {
-    $self->_users->{$nickname}->_del_channel($actual_name)
-  }
+  $_->_del_channel($actual_name) for $chobj->user_objects;
   $chobj
 };
 
