@@ -253,6 +253,7 @@ $User{Foo}->set_nickname('fOO');
 channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
   'Channel->user_list after set_nickname ok (2)';
 
+# FIXME test del_user(s) retvals
 # Channel->del_users  (by name, folded)
 # ('Ba[]r', 'fOO' from #B{az})
 #   -> #quux  => [ 'Ba[]r' ]
@@ -338,10 +339,52 @@ channel_has_users $Chan{Baz}, [qw/Ba[]r fOO/];
 user_has_channels $User{Bar}, ['#quux', '#B{az}'];
 user_has_channels $User{Foo}, ['#quux', '#B{az}'];
 
-# User->del_channels  (by name)
+# FIXME test del_channel(s) retval
+# User->del_channel  (by name)
+#   -> #quux  => [ 'Ba[]r', 'fOO' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+$User{Foo}->del_channel('#Quux');
+channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
+  'Channel->user_list (1) after User->del_channel by name ok';
+channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
+  'Channel->user_list (2) after User->del_channel by name ok';
+user_has_channels $User{Foo}, [ '#B{az}' ],
+  'User->channel_list (1) after User->del_channel by name ok';
+user_has_channels $User{Bar}, [ '#B{az}', '#quux' ],
+  'User->channel_list (2) after User->del_channel by name ok';
+
+# User->del_channel  (by obj)
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => []
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+$User{Bar}->del_channel($Chan{Quux});
+ok $Chan{Quux}->is_empty, 'Channel->is_empty after del_channel by obj ok';
+ok !$User{Bar}->on_channel('#quux'),
+  '! User->on_channel after del_channel by obj ok';
+
+$Chan{Quux}->add_users($User{Bar}, $User{Foo});
+channel_has_users $Chan{Quux}, [qw/Ba[]r fOO/];
+# User->del_channels   (by name)
+#   -> #quux  => [ 'Ba[]r', 'fOO' ]
+#   -> #B{az} => [ 'Ba[]r', 'fOO' ]
+#  =>
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+$User{Foo}->del_channels('#quux', '#b[AZ]');
+channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
+  'Channel->user_list (1) after User->del_channels by name ok';
+channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
+  'Channel->user_list (2) after User->del_channels by name ok';
+user_has_channels $User{Foo}, [],
+  'User->channel_list is empty after User->del_channels by name';
+
 # User->del_channels  (by obj)
-# User->del_channel   (by name)
-# User->del_channels  (by obj)
+# FIXME
 
 # FIXME deleting channel from state deletes from users
 # State->del_channels  (by name)
