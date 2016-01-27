@@ -29,9 +29,11 @@ cmp_ok $user->casemap, 'eq', $st->casemap, 'User casemap matches State ok';
 # add_user
 cmp_ok $st->add_user($user), '==', $user, 'add_user returned User obj ok';
 
-# attempting to re-add user croaks
-eval {; $st->add_user($user) };
-like $@, qr/exist/, 'add_user for existing user croaks ok';
+# attempting to re-add user warns
+{ my $warned; local $SIG{__WARN__} = sub { $warned = shift };
+  $st->add_user($user);
+  like $warned, qr/exist/, 'add_user for existing user warns';
+}
 
 # build_and_add_user  ('Ba[\]r')
 $user = $st->build_and_add_user(
