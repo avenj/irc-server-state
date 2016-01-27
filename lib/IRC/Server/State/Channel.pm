@@ -52,6 +52,8 @@ sub has_user {
   $self->_users->exists( lc_irc $name, $self->casemap )
 }
 
+sub is_empty { shift->_users->is_empty }
+
 sub _add_user {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj->nickname, $self->casemap;
