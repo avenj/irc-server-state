@@ -41,8 +41,8 @@ sub on_channel {
 
 sub _add_channel {
   my ($self, $obj) = @_;
-  my $lower = lc_irc $obj, $self->casemap;
-  $self->_chans->{$lower} = $obj;
+  my $lower = lc_irc $obj->name, $self->casemap;
+  $self->_chans->set($lower => $obj);
   weaken $self->_chans->{$lower};
   $lower
 }

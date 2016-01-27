@@ -55,7 +55,7 @@ sub has_user {
 sub _add_user {
   my ($self, $obj) = @_;
   my $lower = lc_irc $obj->nickname, $self->casemap;
-  $self->_users->{$lower} = $obj;
+  $self->_users->set($lower => $obj);
   weaken $self->_users->{$lower};
   $lower
 }
@@ -98,11 +98,10 @@ sub del_users {
 
 sub _nick_chg {
   my ($self, $old_actual, $new_actual) = @_;
-  warn "DEBUG  KNOWN USERS  " . $self->_users->keys->join(',');
   my $old_rec = delete $self->_users->{$old_actual};
   confess "User not in channel (@{[$self->name]}) state: '$old_actual'"
     unless $old_rec;
-  $self->_users->{$new_actual} = $old_rec
+  $self->_users->{$new_actual} = $old_rec;
 }
 
 # FIXME more user manip methods
