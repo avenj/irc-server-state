@@ -71,6 +71,17 @@ sub del_channel {
   $obj
 }
 
+sub del_channels {
+  my $self = shift;
+  my @removed;
+  for my $chan (@_) {
+    if (my $obj = $self->del_channel($chan)) {
+      push @removed, $obj
+    }
+  }
+  \@removed
+}
+
 has $_ => (
   required  => 1,
   is        => 'ro',
