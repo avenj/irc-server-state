@@ -21,8 +21,6 @@ has _users => (
   isa     => TypedHash[ InstanceOf['IRC::Server::State::User'] ],
   coerce  => 1,
   builder => sub { +{} },
-  # hash_of User, keyed on nick or TS6 ID
-  # (strong refs)
   handles => +{
     find_users  => 'kv_grep',  # FIXME method?
   },

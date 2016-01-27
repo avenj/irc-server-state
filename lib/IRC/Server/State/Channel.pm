@@ -23,6 +23,11 @@ has name => (
   isa       => Str,
 );
 
+sub lower {
+  my ($self) = @_;
+  lc_irc $self->name, $self->casemap
+}
+
 has lists => (
   # $chan->lists->get('b')->exists($mask)
   lazy      => 1,
@@ -106,7 +111,6 @@ sub _nick_chg {
   $self->_users->{$new_actual} = $old_rec;
 }
 
-# FIXME more user manip methods
 
 #has modes => (
   # FIXME

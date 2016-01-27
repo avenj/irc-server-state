@@ -29,6 +29,8 @@ has _chans => (
   builder   => sub { +{} },
 );
 
+# FIXME fair bit of code dupe with ChannelCollection
+
 sub channel_list { map {; $_->name } values %{ $_[0]->_chans } }
 
 sub channel_objects { values %{ $_[0]->_chans } }
@@ -114,6 +116,11 @@ sub set_nickname {
     }
   }
   $new
+}
+
+sub lower {
+  my ($self) = @_;
+  lc_irc $self->nickname, $self->casemap
 }
 
 has id => (
