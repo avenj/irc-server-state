@@ -234,6 +234,14 @@ is_deeply
   +{ 'Ba[]r' => 1, 'Foo' => 1 },
   'Channel->user_objects ok';
 
+# User->on_channel
+ok $User{Foo}->on_channel($Chan{Baz}), 'User->on_channel by obj ok';
+ok $User{Foo}->on_channel('#b[az]'), 'User->on_channel by (folded) name ok';
+
+# Channel->has_user
+ok $Chan{Quux}->has_user($User{Bar}), 'Channel->has_user by obj ok';
+ok $Chan{Quux}->has_user('ba{}r'), 'Channel->has_user by (folded) name ok';
+
 # user_list after set_nickname (Foo -> foobar -> fOO)
 # (also covers channel list interaction wrt nick changes)
 #  -> #quux  => [ 'Ba[]r' ]
@@ -251,6 +259,12 @@ channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
 #   -> #B{az} => []
 $Chan{Baz}->del_users('ba{}r', 'Foo');
 ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
+
+# negative User->on_channel / Channel->has_user
+ok !$User{Foo}->on_channel($Chan{Baz}),
+  'User->on_channel by obj ok (1) after del_users by name';
+ok !$User{Bar}->on_channel($Chan{Baz}),
+  'User->on_channel by obj ok (2) after del_users by name';
 
 # Channel->del_users  (by obj)
 #   -> #quux  => [ 'Ba[]r' ]
