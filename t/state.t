@@ -253,13 +253,18 @@ $User{Foo}->set_nickname('fOO');
 channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
   'Channel->user_list after set_nickname ok (2)';
 
-# FIXME test del_user(s) retvals
 # Channel->del_users  (by name, folded)
 # ('Ba[]r', 'fOO' from #B{az})
 #   -> #quux  => [ 'Ba[]r' ]
 #   -> #B{az} => []
-$Chan{Baz}->del_users('ba{}r', 'Foo');
+my $removed = $Chan{Baz}->del_users('ba{}r', 'Foo');
 ok !$Chan{Baz}->user_list, 'Channel empty after del_users by name ok';
+
+is_deeply
+  +{ map {; $_->nickname => 1 } @$removed },
+  +{ 'Ba[]r' => 1, 'fOO' => 1 },
+  'del_users returned deleted user objs'
+    or diag explain $removed;
 
 # negative User->on_channel / Channel->has_user
 ok !$User{Foo}->on_channel($Chan{Baz}),
@@ -297,7 +302,8 @@ user_has_channels $User{Foo}, [],
 #   -> #B{az} => [ 'Ba[]r' ]
 $Chan{Baz}->add_user( $User{Foo} );
 user_has_channels $User{Foo}, [ '#B{az}' ];
-$Chan{Baz}->del_user( 'Foo' );
+$removed = $Chan{Baz}->del_user( 'Foo' );
+cmp_ok $removed->nickname, 'eq', 'fOO', 'del_user returned delete user obj';
 channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
   'Channel->user_list after del_user by name ok';
 user_has_channels $User{Foo}, [],
@@ -339,14 +345,14 @@ channel_has_users $Chan{Baz}, [qw/Ba[]r fOO/];
 user_has_channels $User{Bar}, ['#quux', '#B{az}'];
 user_has_channels $User{Foo}, ['#quux', '#B{az}'];
 
-# FIXME test del_channel(s) retval
 # User->del_channel  (by name)
 #   -> #quux  => [ 'Ba[]r', 'fOO' ]
 #   -> #B{az} => [ 'Ba[]r', 'fOO' ]
 #  =>
 #   -> #quux  => [ 'Ba[]r' ]
 #   -> #B{az} => [ 'Ba[]r', 'fOO' ]
-$User{Foo}->del_channel('#Quux');
+$removed = $User{Foo}->del_channel('#Quux');
+cmp_ok $removed->name, 'eq', '#quux', 'del_channel returned deleted obj';
 channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
   'Channel->user_list (1) after User->del_channel by name ok';
 channel_has_users $Chan{Baz}, [ qw/Ba[]r fOO/ ],
@@ -375,7 +381,7 @@ channel_has_users $Chan{Quux}, [qw/Ba[]r fOO/];
 #  =>
 #   -> #quux  => [ 'Ba[]r' ]
 #   -> #B{az} => [ 'Ba[]r' ]
-$User{Foo}->del_channels('#quux', '#b[AZ]');
+$removed = $User{Foo}->del_channels('#quux', '#b[AZ]');
 channel_has_users $Chan{Quux}, [ 'Ba[]r' ],
   'Channel->user_list (1) after User->del_channels by name ok';
 channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
@@ -383,19 +389,35 @@ channel_has_users $Chan{Baz}, [ 'Ba[]r' ],
 user_has_channels $User{Foo}, [],
   'User->channel_list is empty after User->del_channels by name';
 
+is_deeply
+  +{ map {; $_->name => 1 } @$removed },
+  +{ '#quux' => 1, '#B{az}' => 1 },
+  'del_channels returned deleted objects'
+    or diag explain $removed;
+
 # User->del_channels  (by obj)
-# FIXME
+#   -> #quux  => [ 'Ba[]r' ]
+#   -> #B{az} => [ 'Ba[]r' ]
+#  =>
+#   -> #quux  => []
+#   -> #B{az} => []
+$User{Bar}->del_channels($Chan{Quux}, $Chan{Baz});
+ok $Chan{Quux}->is_empty, 'Channel empty after del_channels by obj (1)';
+ok $Chan{Baz}->is_empty,  'Channel empty after del_channels by obj (2)';
+ok !$User{Bar}->on_channel('#quux'),
+  'User not on_channel after del_channels by obj (1)';
+ok !$User{Bar}->on_channel('#b{az}'),
+  'User not on_channel after del_channels by obj (2)';
 
 # FIXME deleting channel from state deletes from users
 # State->del_channels  (by name)
 # State->del_channels  (by obj)
 # State->del_channel   (by name)
 # State->del_channels  (by obj)
-
 # FIXME deleting user from state deletes from channels
 
-# FIXME should adding a previously nonexistant channel to a User belonging to
-#  a State add to State, warn, die?
+# FIXME should adding a previously nonexistant Channel to a User belonging to
+#  a State add to State, warn, die? same wrt User added to Channel?
 
 ## strict-rfc1459
 # FIXME
