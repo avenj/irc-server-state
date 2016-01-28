@@ -3,6 +3,7 @@ use strict; use warnings;
 
 use IRC::Server::State;
 use IRC::Toolkit::Case;
+use IRC::Toolkit::Modes;
 
 my $st = IRC::Server::State->new;
 my $user = $st->build_user(
@@ -56,6 +57,57 @@ ok $user->meta->get('foo') == 1, 'meta hash is mutable';
 
 # FIXME test for required attrs
 
-# FIXME umodes
+
+cmp_ok $user->umode, 'eq', '+', 'empty default umode (+)';
+
+# add modes (string, no params)
+$user->set_mode('+oa');
+ok $user->has_mode('o'), 'user set mode +o';
+ok $user->has_mode('a'), 'user set mode +a';
+cmp_ok $user->umode, 'eq', '+ao', 'umode returns +ao';
+
+# drop modes (string, no params)
+# FIXME
+
+# mixed (string, no params)
+# FIXME
+
+# add modes (string, params)
+# FIXME
+
+# mixed (string, params)
+# FIXME
+
+# add modes (mode array, no params)
+# FIXME
+
+# drop modes (mode array, no params)
+# FIXME
+
+# mixed (mode array, no params)
+# FIXME
+
+# add modes (mode array, params)
+$user->set_mode(
+  mode_to_array(
+    '+eS 123',
+    param_set => ['S'],
+  )
+);
+# FIXME
+
+# mixed (mode array, params)
+# FIXME
+
+# add modes (mode hash, no params)
+# FIXME
+# drop modes (mode hash, no params)
+# FIXME
+# mixed (mode hash, no params)
+# FIXME
+# add_modes (mode hash, params)
+# FIXME
+# mixed (mode hash, params)
+# FIXME
 
 done_testing
