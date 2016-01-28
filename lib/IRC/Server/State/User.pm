@@ -118,6 +118,12 @@ sub set_nickname {
   $new
 }
 
+sub full {
+  # FIXME maybe an attr with triggers? see IRC::Server::Pluggable::IRC::User
+  my ($self) = @_;
+  $self->nickname .'!'. $self->username .'@'. $self->hostname
+}
+
 sub lower {
   my ($self) = @_;
   lc_irc $self->nickname, $self->casemap
