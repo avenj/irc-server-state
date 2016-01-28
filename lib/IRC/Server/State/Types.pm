@@ -10,5 +10,7 @@ use Types::Standard -types;
 declare ValidCasemap =>
   as Enum[qw/rfc1459 strict-rfc1459 ascii/];
 
+declare ModeConfig =>
+  as InstanceOf['IRC::Server::State::ModeConfig'];
 
 1;
