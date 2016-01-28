@@ -2,7 +2,7 @@ package IRC::Server::State::User;
 
 use strictures 2;
 use Carp;
-use Scalar::Util 'blessed', 'weaken';
+use Scalar::Util 'blessed', 'weaken', 'reftype';
 
 use IRC::Server::State::Types -types;
 use Types::Standard           -types;
@@ -158,10 +158,6 @@ has peer => (
   builder   => sub { '' },
 );
 
-#has modes => (
-  # FIXME
-#);
-
 has meta => (
   lazy      => 1,
   is        => 'ro',
@@ -170,5 +166,75 @@ has meta => (
   predicate => 1,
   builder   => sub { +{} },
 );
+
+has _umode => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => HashObj,
+  coerce    => 1,
+  predicate => 1,
+  builder   => sub { +{} },
+);
+
+# FIXME ModeConfig object defining valid modes & modes accepting params
+#  for feeding mode_to_array ?
+
+sub mode {
+  my ($self, %param) = @_;
+  return '+' if $self->_umode->is_empty;
+  my $str = '+';
+  my @params;
+  $self->_umode->kv_sort->visit(sub {
+    my ($mode, $param) = @$_;
+    $str .= $mode;
+    push @params, $param if length $param;
+  });
+  join ' ', $str, ( $param{show_params} ? @params : () )
+}
+
+sub set_mode {
+  my ($self, $mode) = @_;
+  if (ref $mode) {
+    return reftype $mode eq 'ARRAY' ? $self->_set_mode_array($mode)
+         : reftype $mode eq 'HASH'  ? $self->_set_mode_hash($mode)
+         : confess "Expected mode string, ARRAY, or HASH, but got '$mode'"
+  }
+  $self->_set_mode_str($mode);
+  # FIXME takes: mode string, mode ARRAY (mode_to_array style), HASH
+  # FIXME use empty str for paramless modes in _umode hash
+}
+
+sub _set_mode_str {
+  my ($self, $mode) = @_;
+  # FIXME mode_to_array and _set_mode_array
+}
+
+sub _set_mode_array {
+  my ($self, $mode) = @_;
+  # FIXME iter
+}
+
+sub _set_mode_hash {
+  my ($self, $mode) = @_;
+  # FIXME iter
+}
+
+sub has_mode {
+  my ($self, $mode) = @_;
+  $self->_umode->exists($mode)
+}
+
+sub params_for_mode {
+  my ($self, $mode) = @_;
+  $self->_umode->get($mode)
+}
+
+sub mode_array {
+
+}
+
+sub mode_hash {
+
+}
 
 1;
