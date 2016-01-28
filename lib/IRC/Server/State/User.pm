@@ -211,12 +211,16 @@ sub _set_mode_str {
 
 sub _set_mode_array {
   my ($self, $mode) = @_;
-  # FIXME iter
+  # FIXME take mode_to_array style mode array,
+  #  adjust ->_umode
 }
 
 sub _set_mode_hash {
   my ($self, $mode) = @_;
-  # FIXME iter
+  # FIXME take hash in the form of:
+  #  +{ o => '', S => 'foo' }
+  # or:
+  #  +{ '-o' => '', '+S' => 'foo' }
 }
 
 sub has_mode {
@@ -230,11 +234,10 @@ sub params_for_mode {
 }
 
 sub mode_array {
-
+  # FIXME return mode_to_array style array 
+  #  (transformation tool for hash -> array in IRC::Toolkit::Modes ?)
 }
 
-sub mode_hash {
-
-}
+sub mode_hash { shift->_umode->copy }
 
 1;

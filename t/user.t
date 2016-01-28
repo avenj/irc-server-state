@@ -74,6 +74,8 @@ cmp_ok $user->umode, 'eq', '+ao', 'umode returns +ao';
 
 # add modes (string, params)
 # FIXME
+# FIXME test ->mode(show_params => 1)
+# FIXME test ->params_for_mode
 
 # mixed (string, params)
 # FIXME
