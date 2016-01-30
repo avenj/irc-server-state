@@ -1,8 +1,9 @@
 package IRC::Server::State::User;
 
 use strictures 2;
-use Carp;
-use Scalar::Util 'blessed', 'weaken', 'reftype';
+
+use Carp          'cluck', 'carp', 'confess';
+use Scalar::Util  'blessed', 'weaken', 'reftype';
 
 use IRC::Server::State::Types -types;
 use Types::Standard           -types;
@@ -217,16 +218,24 @@ sub _set_mode_str {
 
 sub _set_mode_array {
   my ($self, $mode) = @_;
-  # FIXME take mode_to_array style mode array,
-  #  adjust ->_umode
+  # FIXME take mode_to_array style mode array
+  # FIXME use empty str for paramless modes in _umode hash
 }
 
 sub _set_mode_hash {
   my ($self, $mode) = @_;
-  # FIXME take hash in the form of:
-  #  +{ o => '', S => 'foo' }
-  # or:
-  #  +{ '-o' => '', '+S' => 'foo' }
+  # takes hash produced by IRC::Toolkit::Modes::mode_to_hash ->
+  unless (exists $mode->{add} || exists $mode->{del}) {
+    cluck "Expected 'add' and/or 'del' keys in mode hash, doing nothing";
+    return
+  }
+  if (exists $mode->{add}) {
+    $self->_umode->set($_ => $mode->{add}->{$_}) for keys %{ $mode->{add} }
+  }
+  if (exists $mode->{del}) {
+    $self->_umode->delete(keys %{ $mode->{del} })
+  }
+  1
 }
 
 sub has_mode {
@@ -241,7 +250,6 @@ sub params_for_mode {
 
 sub mode_array {
   # FIXME return mode_to_array style array 
-  #  (transformation tool for hash -> array in IRC::Toolkit::Modes ?)
 }
 
 sub mode_hash { shift->_umode->copy }
