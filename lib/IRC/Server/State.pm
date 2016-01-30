@@ -10,6 +10,8 @@ use IRC::Server::State::Types -all;
 
 use IRC::Toolkit::Case;
 
+use IRC::Server::State::ModeConfig;
+
 use Moo 2;
 
 with 
@@ -17,6 +19,10 @@ with
      'IRC::Server::State::Role::UserCollection',
      'IRC::Server::State::Role::ChannelCollection',
 ;
+
+has user_mode_config => (
+  # FIXME ModeConfig for umodes
+);
 
 has user_class => (
   lazy      => 1,
@@ -30,6 +36,7 @@ sub build_user {
   use_module( $self->user_class )->new(
     state   => $self,
     casemap => $self->casemap,
+    mode_config => $self->user_mode_config,
     @_
   )
 }
@@ -48,6 +55,10 @@ around del_user => sub {
 };
 
 
+has channel_mode_config => (
+  # FIXME ModeConfig for channel modes
+);
+
 has channel_class => (
   lazy      => 1,
   is        => 'ro',
@@ -60,6 +71,7 @@ sub build_channel {
   use_module( $self->channel_class )->new(
     state   => $self,
     casemap => $self->casemap,
+    mode_config => $self->channel_mode_config,
     @_
   )
 }

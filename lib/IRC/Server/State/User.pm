@@ -11,6 +11,7 @@ use List::Objects::Types      -types;
 
 use IRC::Toolkit::Case 'lc_irc';
 
+use IRC::Server::State::ModeConfig;
 
 use Moo;
 with 'IRC::Server::State::Role::HasCasemap';
@@ -183,8 +184,17 @@ has _umode => (
   builder   => sub { +{} },
 );
 
-# FIXME ModeConfig object defining valid modes & modes accepting params
-#  for feeding mode_to_array ?
+has mode_config => (
+  lazy      => 1,
+  is        => 'ro',
+  isa       => ModeConfig,
+  builder   => sub {
+    IRC::Server::State::ModeConfig->new(
+      param_always    => [],
+      param_when_set  => [],
+    )
+  },
+);
 
 sub mode {
   my ($self, %param) = @_;
@@ -206,14 +216,13 @@ sub set_mode {
          : reftype $mode eq 'HASH'  ? $self->_set_mode_hash($mode)
          : confess "Expected mode string, ARRAY, or HASH, but got '$mode'"
   }
-  $self->_set_mode_str($mode);
-  # FIXME takes: mode string, mode ARRAY (mode_to_array style), HASH
-  # FIXME use empty str for paramless modes in _umode hash
-}
-
-sub _set_mode_str {
-  my ($self, $mode) = @_;
-  # FIXME mode_to_array and _set_mode_array
+  # else a str:
+  $self->_set_mode_array( 
+    mode_to_array( $mode,
+      param_always   => $self->mode_config->param_always,
+      param_when_set => $self->mode_config->param_when_set
+    )
+  )
 }
 
 sub _set_mode_array {
