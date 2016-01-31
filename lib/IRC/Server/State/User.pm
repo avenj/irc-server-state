@@ -269,9 +269,17 @@ sub params_for_mode {
 }
 
 sub mode_array {
-  # FIXME return mode_to_array style array 
+  my ($self) = @_;
+  # same format as mode_to_array (well, except this is a lowu array) ->
+  $self->_umode->kv->map(sub {
+    my ($mode, $param) = @$_;
+    [ '+', $mode, ( length $param ? $param : () ) ]
+  })
 }
 
-sub mode_hash { shift->_umode->copy }
+sub mode_hash {
+  # FIXME should we return same format as mode_to_hash ?
+  shift->_umode->copy
+}
 
 1;
