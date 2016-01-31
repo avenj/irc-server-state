@@ -227,8 +227,19 @@ sub set_mode {
 
 sub _set_mode_array {
   my ($self, $mode) = @_;
-  # FIXME take mode_to_array style mode array
-  # FIXME use empty str for paramless modes in _umode hash
+  for my $mset (@$mode) {
+    my ($flag, $mode, $param) = @$mset;
+    if ($flag eq '+') {
+      $self->_umode->set($mode => $param // '')
+    } elsif ($flag eq '-') {
+      $self->_umode->delete($mode)
+    } else {
+      confess "Bad mode flag '$flag'"
+    }
+  }
+  # FIXME return actual set of changes from _set_mode_array/_set_mode_hash,
+  #  skipping previously set (or previously unset) modes ?
+  1
 }
 
 sub _set_mode_hash {
