@@ -212,11 +212,16 @@ sub mode {
 sub set_mode {
   my ($self, $mode) = @_;
   if (ref $mode) {
+    if (blessed $mode) {
+      $mode = $mode->isa('IRC::Mode::Set') ? $mode->mode_array
+        : $mode->isa('IRC::Mode::Single') ? [ [@$mode] ]
+        : confess "Do not know how to set_mode via '$mode'";
+    }
     return reftype $mode eq 'ARRAY' ? $self->_set_mode_array($mode)
          : reftype $mode eq 'HASH'  ? $self->_set_mode_hash($mode)
          : confess "Expected mode string, ARRAY, or HASH, but got '$mode'"
   }
-  # else a str:
+  # else a stringy mode presumably
   $self->_set_mode_array( 
     mode_to_array( $mode,
       param_always   => $self->mode_config->param_always,
@@ -239,6 +244,9 @@ sub _set_mode_array {
   }
   # FIXME return actual set of changes from _set_mode_array/_set_mode_hash,
   #  skipping previously set (or previously unset) modes ?
+  #  would simplify life for higher-level layers directing output at clients,
+  #  but also requires checking param_always/param_when_set modes (+ is always
+  #  valid)
   1
 }
 
@@ -278,7 +286,7 @@ sub mode_array {
 }
 
 sub mode_hash {
-  # FIXME should we return same format as mode_to_hash ?
+  # FIXME should we return same format as mode_to_hash ? (perhaps optionally)
   shift->_umode->copy
 }
 
