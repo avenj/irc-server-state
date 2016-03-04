@@ -112,4 +112,13 @@ $user->set_mode(
 # mixed (mode hash, params)
 # FIXME
 
+# FIXME same tests wrt IRC::Mode::Single, IRC::Mode::Set
+#  um, a Test::Roo setup might make more sense here,
+#  or at least a helper, run same set_mode tests against each of:
+#   string
+#   array
+#   hash
+#   IRC::Mode::Set
+#   IRC::Mode::Single
+
 done_testing
