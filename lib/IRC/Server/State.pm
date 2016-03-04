@@ -21,7 +21,15 @@ with
 ;
 
 has user_mode_config => (
-  # FIXME ModeConfig for umodes
+  lazy      => 1,
+  is        => 'ro',
+  isa       => ModeConfig,
+  builder   => sub {
+    IRC::Server::State::ModeConfig->new(
+      param_always   => [],
+      param_when_set => [],
+    )
+  },
 );
 
 has user_class => (
@@ -56,7 +64,19 @@ around del_user => sub {
 
 
 has channel_mode_config => (
-  # FIXME ModeConfig for channel modes
+  lazy      => 1,
+  is        => 'ro',
+  isa       => ModeConfig,
+  builder   => sub {
+    IRC::Server::State::ModeConfig->new(
+      # FIXME needs some consideration wrt list modes (param_always)
+      # and how these should operate in Channels, ModeConfig might need a
+      # list_modes attr that is appended to param_always and handled by
+      # Channels ( ->_list->{$mode} ) ...
+      #  ... ought see what I was up to in irc-server-pluggable ...
+      param_set  => [ 'l' ],
+    )
+  },
 );
 
 has channel_class => (
