@@ -25,6 +25,15 @@ has param_when_set => (
   coerce    => 1,
 );
 
+sub BUILD {
+  my ($self) = @_;
+  my $conflict = $self->param_always->intersection($self->param_when_set);
+  unless ($conflict->is_empty) {
+    confess "Conflicting modes in param_always/param_when_set: "
+      . $conflict->map(sub { "'$_'" })->join(' ')
+  }
+}
+
 sub mode_to_array {
   my ($self, $mode_string, @params) = @_;
   IRC::Toolkit::Modes::mode_to_array( $mode_string,
