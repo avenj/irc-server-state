@@ -3,6 +3,13 @@ use strict; use warnings;
 
 use IRC::Server::State::ModeConfig;
 
+my $obj = IRC::Server::State::ModeConfig->new(
+  param_always => [ 'k' ],
+  param_when_set => [ 'l' ],
+);
+
+isa_ok $obj, 'IRC::Server::State::ModeConfig';
+
 
 subtest 'attribute validation' => sub {
   eval {; IRC::Server::State::ModeConfig->new };

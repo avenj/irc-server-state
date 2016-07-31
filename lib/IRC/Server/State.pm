@@ -23,7 +23,7 @@ with
 has user_mode_config => (
   lazy      => 1,
   is        => 'ro',
-  isa       => ModeConfig,
+  isa       => ModeCfg,
   builder   => sub {
     IRC::Server::State::ModeConfig->new(
       param_always   => [],
@@ -66,7 +66,7 @@ around del_user => sub {
 has channel_mode_config => (
   lazy      => 1,
   is        => 'ro',
-  isa       => ModeConfig,
+  isa       => ModeCfg,
   builder   => sub {
     IRC::Server::State::ModeConfig->new(
       # FIXME needs some consideration wrt list modes (param_always)
@@ -74,7 +74,8 @@ has channel_mode_config => (
       # list_modes attr that is appended to param_always and handled by
       # Channels ( ->_list->{$mode} ) ...
       #  ... ought see what I was up to in irc-server-pluggable ...
-      param_set  => [ 'l' ],
+      param_when_set  => [ 'l' ],
+      param_always    => [ 'k' ],
     )
   },
 );

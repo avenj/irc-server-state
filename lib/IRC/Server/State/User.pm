@@ -187,7 +187,7 @@ has _umode => (
 has mode_config => (
   lazy      => 1,
   is        => 'ro',
-  isa       => ModeConfig,
+  isa       => ModeCfg,
   builder   => sub {
     IRC::Server::State::ModeConfig->new(
       param_always    => [],
